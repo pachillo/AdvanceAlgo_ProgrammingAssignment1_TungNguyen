@@ -1,0 +1,17 @@
+# Dune build artifacts
+implementation/_build/
+implementation/*.install
+
+# LaTeX build artifacts
+report/build/
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.synctex.gz
+*.toc
+
+# Editor / OS files
+.DS_Store
+*~
+*.swp

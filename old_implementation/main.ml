@@ -28,4 +28,7 @@ let () =
   let freq = Naive_dft.naive_dft input in
   print_complex_array "DFT Result (Frequency Domain)" freq;
 
+  let fft = Cooley_tukey_fft.cooley_tukey input in
+  print_complex_array "FFT Result (Cooley-Tukey)" fft;
+
   Printf.printf "Run successful!\n"

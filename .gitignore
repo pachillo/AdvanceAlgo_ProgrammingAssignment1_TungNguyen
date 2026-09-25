@@ -2,6 +2,16 @@
 implementation/_build/
 implementation/*.install
 
+# C++ build artifacts
+build/
+implementation/build/
+cmake-build-*/
+compile_commands.json
+*.o
+*.a
+*.so
+*.out
+
 # LaTeX build artifacts
 report/build/
 *.aux
@@ -15,3 +25,4 @@ report/build/
 .DS_Store
 *~
 *.swp
+.vscode/

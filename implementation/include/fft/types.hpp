@@ -3,6 +3,7 @@
 #include <complex>
 #include <numbers>
 #include <vector>
+#include <cstddef>
 
 namespace fft {
 

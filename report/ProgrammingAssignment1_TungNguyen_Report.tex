@@ -7,21 +7,12 @@
 \usepackage{amsmath, amssymb} 
 \usepackage{graphicx}       
 \usepackage{algorithm}
-\usepackage{algpseudocode}
 \usepackage{geometry}       
 \geometry{a4paper, margin=1in}
+\usepackage[noend]{algpseudocode} 
 \renewcommand{\algorithmicrequire}{\textbf{Input:}}
 \renewcommand{\algorithmicensure}{\textbf{Output:}}
 \renewcommand{\algorithmiccomment}[1]{\hfill\textcolor{gray}{\# #1}}
-
-% Custom Python commands
-\newcommand{\PyDef}[2]{\State \textbf{def} \textsc{#1}(#2):}
-\newcommand{\PyFor}[2]{\State \textbf{for} #1 \textbf{in} #2:}
-\newcommand{\PyIf}[1]{\State \textbf{if} #1:}
-\newcommand{\PyElif}[1]{\State \textbf{elif} #1:}
-\newcommand{\PyElse}{\State \textbf{else}:}
-\newcommand{\PyWhile}[1]{\State \textbf{while} #1:}
-\newcommand{\PyReturn}[1]{\State \textbf{return} #1}
 % --- Title & Author ---
 \title{41052 - Advanced Algorithms \\ {\Large Programming Assignment 1 - Fast Fourier Transform}}
 \author{Tung Nguyen - 24666048}
@@ -33,36 +24,44 @@
 \pagebreak
 
 \section{A little history}
-In 1802, Napoleon Bonaparte appointed Joseph Fourier as the Prefect of Isère in Grenoble, France. Managing regional public works by day, Fourier spent his nights studying heat diffusion. Starting from Newton's Law of Cooling, he showed how arbitrary functions could be broken down into trigonometric series and integral transform pairs. He presented his findings to the Institut de France in 1807, but the review committee, including Joseph-Louis Lagrange and Pierre-Simon Laplace, held it back due to doubts over mathematical rigour. Only in 1822, after becoming Permanent Secretary of the Académie des Sciences, did Fourier formally publish his treatise Théorie analytique de la chaleur, establishing the continuous Fourier Transform.
+% In 1802, Napoleon Bonaparte appointed Joseph Fourier as the Prefect of Isère in Grenoble, France. Managing regional public works by day, Fourier spent his nights studying heat diffusion. Starting from Newton's Law of Cooling, he showed how arbitrary functions could be broken down into trigonometric series and integral transform pairs. He presented his findings to the Institut de France in 1807, but the review committee, including Joseph-Louis Lagrange and Pierre-Simon Laplace, held it back due to doubts over mathematical rigour. Only in 1822, after becoming Permanent Secretary of the Académie des Sciences, did Fourier formally publish his treatise Théorie analytique de la chaleur, establishing the continuous Fourier Transform.
 
-The discrete version actually predated Fourier's work. In 1759, Alexis Clairaut published an early discrete trigonometric formula while calculating celestial orbits. In 1805, Carl Friedrich Gauss refined this technique to track the paths of asteroids, effectively devising both the discrete Fourier formula and an early Fast Fourier Transform (FFT). Because Gauss recorded his findings in unpublished Latin notes, his work remained largely overlooked until long after his death.
+The Discrete Fourier Transform wasn't invented by Joseph Fourier.
+It actually predated Fourier's work on the continuous Fourier Transform (formally published in 1822)! In 1759, Alexis Clairaut published an early discrete trigonometric formula while calculating celestial orbits. In 1805, Carl Friedrich Gauss refined this technique to track the paths of asteroids, effectively devising both the discrete Fourier formula and an early Fast Fourier Transform (FFT). However, his work remained largely overlooked until long after his death because it was recorded his findings in unpublished Latin notes with unconventional notation. Since this formula handles discrete values with methods like the Fourier transform, later on it was named as the Discrete Fourier Transform.
 
-The modern breakthrough occurred during the Cold War. As the United States and the Soviet Union negotiated nuclear test bans, verifying compliance required distinguishing clandestine underground nuclear tests from natural earthquakes. Processing the flood of discrete seismic sensor data was computationally impractical using standard matrix methods, which scaled at $\mathcal{O}(N^2)$.
+The modern breakthrough occurred during the Cold War. As the United States and the Soviet Union negotiated nuclear test bans, verifying compliance required distinguishing clandestine underground nuclear tests from natural earthquakes. Processing the flood of discrete seismic sensor data was computationally impractical using standard methods, which scaled at $\mathcal{O}(N^2)$.
 
 Physicist and defence adviser Richard Garwin recognised this bottleneck and raised it with statistician John Tukey from Princeton and Bell Labs. Tukey proposed a divide-and-conquer approach to accelerate the computation and worked with IBM mathematician James Cooley, who implemented and programmed the algorithm. Published in 1965, the Cooley–Tukey FFT slashed the computational cost to $\mathcal{O}(N \log N)$ (fundamentally, Gauss invented the same algorithm but his work went unnoticed). By that time, major countries has already created their nuclear devices and went ahead with their own testing.
 
 Nowadays, the FFT has revolutionised digital signal processing, telecommunications and numerical computing worldwide and become one of the most important algorithm in our lives, as it is used every phone and personal devices and so much more.
 
 \section{Relevant background knowledge}
-The Discrete Fourier Transform (DFT) is a functions that receive an array input of complex number and return an array with the same amount of element. The DFT can be defined as an algorithm.
+\subsection{Discrete Fourier Transform}
+The Discrete Fourier Transform (DFT) is a functions that receive an array input of complex number and return a transformed array with the same amount of element. The DFT can be defined as an algorithm.
 \begin{algorithm}[H]
 \caption{Discrete Fourier Transform}
 \begin{algorithmic}[1]
-\Require Input sequence $x = [x[0], x[1], \dots, x[N-1]]$ of length $N$
-\Ensure Transformed frequency array $X = [X[0], X[1], \dots, X[N-1]]$
+\Require Sequence $x[0 \dots N-1]$ of complex numbers, length $N$
+\Ensure Transformed array $X[0 \dots N-1]$
 
-\State Allocate array $X$ of size $N$, initialised to $0$
-\For{$k \gets 0$ \textbf{to} $N - 1$}
-    \For{$n \gets 0$ \textbf{to} $N - 1$}
-        \State $\theta \gets \frac{2\pi}{N} \cdot k \cdot n$
-        \State $W \gets \cos(\theta) - i\sin(\theta)$ 
-        \State $X[k] \gets X[k] + x[n] \cdot W$
+\Procedure{DFT}{$x, N$}
+    \State Allocate array $X[0 \dots N-1]$ initialised to $0$
+    
+    \For{$k \gets 0$ \textbf{to} $N - 1$}
+        \For{$n \gets 0$ \textbf{to} $N - 1$}
+            \State $\theta \gets \frac{2\pi}{N} \cdot k \cdot n$
+            \State $W \gets \cos\theta - i\sin\theta$ \Comment{The $W$ is known as the twiddle factor}
+            \State $X[k] \gets X[k] + x[n] \cdot W$
+        \EndFor
     \EndFor
-\EndFor
-\State \Return $X$
+    
+    \State \Return $X$
+\EndProcedure
 \end{algorithmic}
 \end{algorithm}
-Looking deeper into this algorithm, the first for loop (line 2) if grabbing every element of the input array of size $N$ (line 6, with $X[k]$). The second for loop (line 3) is also looping over size $N$ to compute for each value of array $X$. Thus, the DFT has a time complexity of $\mathcal{O}(N^2)$.
+Looking deeper into this algorithm, the first for loop (line 2) is going over every element of the input array of size $N$ (line 6, with $X[k]$). The nested for loop (line 3) is also looping over size $N$ to compute for each value of array $X$. Thus, the DFT has a time complexity of $\mathcal{O}(N^2)$.
+
+\
 
 The Inverse Discrete Fourier Transform (IDFT) is used for reversing a transformed array to its original array, essentially undo the DFT. It can also be described as an algorithm. 
 
@@ -72,61 +71,227 @@ The Inverse Discrete Fourier Transform (IDFT) is used for reversing a transforme
 \Require Transformed frequency array $X = [X[0], X[1], \dots, X[N-1]]$ of size $N$
 \Ensure Original sequence $x = [x[0], x[1], \dots, x[N-1]]$
 
-\State Allocate array $x$ of size $N$, initialised to $0$
-
-\For{$n = 0$ \textbf{to} $N - 1$}
-    \For{$k = 0$ \textbf{to} $N - 1$}
-        \State $\theta = \frac{2\pi}{N} \cdot k \cdot n$
-        \State $W = \cos(\theta) + i\sin(\theta)$
-        \State $x[n] = x[n] + X[k] \cdot W$
+\Procedure{IDFT}{$x, N$}
+    \State Allocate array $x[0 \dots N-1]$ initialised to $0$
+\For{$n \gets 0$ \textbf{to} $N - 1$}
+    \For{$k \gets 0$ \textbf{to} $N - 1$}
+        \State $\theta \gets \frac{2\pi}{N} \cdot k \cdot n$
+        \State $W \gets \cos(\theta) + i\sin(\theta)$
+        \State $x[n] \gets x[n] + X[k] \cdot W$
     \EndFor
-    \State $x[n] = \frac{1}{N} \cdot x[n]$
+    \State $x[n] \gets \frac{1}{N} \cdot x[n]$
 \EndFor
 
 \State \Return $x$
+\EndProcedure
 \end{algorithmic}
 \end{algorithm}
 Once again, due to the nested for loops (line 2 and 3), the IDFT has a complexity of $\mathcal{O}(N^2)$.
 
-\vspace{0.3cm}
+\subsection{Fast Fourier Transform}
+The Fast Fourier Transform (FFT) is a class of algorithms that can compute the DFT and IDFT faster than $\mathcal{O}(N^2)$.
+\subsubsection{Radix-2 Fast Fourier Transform}
+The most famous FFT algorithm is the Cooley-Tukey FFT (also known as the Radix-2 FFT) mentioned above. There are two ways to implement this algorithm: iterative and recursive. The core idea for this FFT is apply the divide and conquer strategy to the input array.
 
-A Fast Fourier Transform (FFT) is a class of algorithms that can compute the DFT and iDFT faster than $\mathcal{O}(N^2)$. The most famous FFT algorithm is the Cooley-Tukey FFT (also known as the Radix-2 FFT) mentioned above.
+\paragraph{Iterative Radix-2 FFT}~{}\\
+The iterative version runs with the help of the Bit Reversal Permutation (BRP) algorithm. The BRP essentially loop over an array, for each index it flips the binary (e.g. $001 \mapsto 100, 110 \mapsto 011$), and move the current value to its new index. The reason for this will be discussed in Section \ref{sec:stu}.
 \begin{algorithm}[H]
-\caption{Cooley-Tukey Radix-2 FFT}
+\caption{Bit-Reversal Permutation}
+\label{alg:bit_reversal_arithmetic}
 \begin{algorithmic}[1]
-\Require Input sequence $x = [x[0], x[1], \dots, x[N-1]]$ of length $N = 2^m$
-\Ensure Transformed frequency array $X = [X[0], X[1], \dots, X[N-1]]$
+\Require Array $A[0 \dots N-1]$, length $N = 2^m$
+\Ensure Array $A$ permuted in-place into leaf order
 
-\If{$N = 1$}
-    \State \Return $x$
-\EndIf
-
-\State Allocate array $x_{even}$ of length $\frac{N}2$
-\State Allocate array $x_{odd}$ of length $\frac{N}2$
-
-\For{$k = 0$ \textbf{to} $\frac{N}2$}
-    \State $x_{even}[k] \gets x[2k]$
-    \State $x_{odd}[k] \gets x[2k + 1]$
-\EndFor
-
-\State $E \gets \text{FFT}(x_{even})$ \Comment{Recursive call on even-indexed elements}
-\State $O \gets \text{FFT}(x_{odd})$ \Comment{Recursive call on odd-indexed elements}
-
-\State Allocate array $X$ of length $N$
-
-\For{$k \gets 0$ \textbf{to} $N/2 - 1$}
-    \State $W \gets \exp\left(-i \frac{2\pi}{N} \cdot k\right)$
-    \State $t \gets W \cdot O[k]$
-    \State $X[k] \gets E[k] + t$
-    \State $X[k + N/2] \gets E[k] - t$ 
-\EndFor
-
-\State \Return $X$
+\Procedure{Bit-Reverse-Permutation}{$A, N, m$} \Comment{$m \gets \log_2 N$} 
+    \For{$i \gets 0$ \textbf{to} $N - 1$}
+        \State $rev \gets 0$
+        \State $temp \gets i$
+        
+        \For{$b \gets 0$ \textbf{to} $m - 1$}
+            \State $bit \gets temp \bmod 2$ \Comment{Extract binary split parity}
+            \State $rev \gets 2 \cdot rev + bit$ \Comment{Shift accumulated bits left and append}
+            \State $temp \gets \lfloor temp / 2 \rfloor$ \Comment{Advance to next binary digit}
+        \EndFor
+        
+        \If{$i < rev$}
+            \State $swap(A[i], A[rev])$
+        \EndIf
+    \EndFor
+\EndProcedure
 \end{algorithmic}
 \end{algorithm}
-\section{Fast Fourier Transform Implementation}
+\begin{algorithm}[H]
+\caption{Iterative Radix-2 FFT for DFT}
+\begin{algorithmic}[1]
+\Require Sequence $x[0 \dots N-1]$ of complex numbers, length $N = 2^m$
+\Ensure Transformed array $X[0 \dots N-1]$
 
-\section{The Empirical Study}
+
+\Procedure{FFT}{$x, N$}
+\State $m \gets \log_2 N$
+\State \Call{Bit-Reverse-Permutation}{$X, N, m$} \Comment{Reorder input into leaf order}
+
+    \For{$s \gets 1$ \textbf{to} $\log_2 N$} 
+    \State $m \gets 2^s$ 
+        \State $W_m \gets \exp\left(-i \frac{2\pi}{m}\right)$ 
+        
+        \For{$k \gets 0$ \textbf{to} $N - 1$ \textbf{step} $m$} 
+            \State $W \gets 1$
+            \For{$j \gets 0$ \textbf{to} $m/2 - 1$} 
+                \State $t \gets W \cdot A[k + j + m/2]$
+                \State $u \gets A[k + j]$
+                \State $A[k + j] \gets u + t$ 
+                \State $A[k + j + m/2] \gets u - t$ 
+                \State $W \gets W \cdot W_m$ 
+                \EndFor
+        \EndFor
+    \EndFor
+
+    \State \Return $A$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+Looking deeper into the Iterative version of the Radix-2 FFT, the first part of the algorithm is spent running the BRP algorithm, which first cost $\mathcal{O}(N)$ looping over the entire array. And a nested for loop inside that cost $\mathcal{O}(\log_2N)$. In total, the BRP algorithm cost $\mathcal{O}(N\log_2N)$. 
+
+\paragraph{Recursive Radix-2 FFT}~{}\\
+\begin{algorithm}[H]
+\caption{Recursive Radix-2 FFT for IDFT}
+\label{alg:recursive_radix2_fft}
+\begin{algorithmic}[1]
+\Require Sequence $x[0 \dots N-1]$ of complex numbers, length $N = 2^m$
+\Ensure Transformed array $X[0 \dots N-1]$
+
+\Procedure{FFT}{$x, N$}
+    \If{$N = 1$}
+        \State \Return $x$
+    \EndIf
+
+    \State Allocate array $x_{even}$ of length $N/2$
+    \State Allocate array $x_{odd}$ of length $N/2$
+    
+    \For{$k \gets 0$ \textbf{to} $N/2 - 1$}
+        \State $x_{even}[k] \gets x[2k]$
+        \State $x_{odd}[k] \gets x[2k + 1]$
+    \EndFor
+
+    \State $E \gets \Call{FFT}{x_{even}, N/2}$ \Comment{Sub-transform of even elements}
+    \State $O \gets \Call{FFT}{x_{odd}, N/2}$  \Comment{Sub-transform of odd elements}
+
+    \State Allocate array $X$ of length $N$
+    \For{$k \gets 0$ \textbf{to} $N/2 - 1$}
+        \State $W \gets \exp\left(-i \frac{2\pi}{N} \cdot k\right)$
+        \State $t \gets W \cdot O[k]$
+        \State $X[k] \gets E[k] + t$
+        \State $X[k + N/2] \gets E[k] - t$
+    \EndFor
+
+    \State \Return $X$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\subsubsection{Optimising with Precomputed Twiddle}
+\begin{algorithm}[H]
+\caption{Iterative Radix-2 FFT with Precomputed Twiddle Table}
+\label{alg:iterative_fft_twiddle}
+\begin{algorithmic}[1]
+\Require Complex array $A[0 \dots N-1]$, precomputed table $W[0 \dots N/2 - 1]$ where $W[k] = e^{-i \frac{2\pi}{N} k}$
+\Ensure Transformed spectrum stored in-place in $X$
+
+\Procedure{Precompute-Twiddles}{$N$}
+    \State Allocate table $W$ of size $N/2$
+    \For{$k \gets 0$ \textbf{to} $N/2 - 1$}
+        \State $W[k] \gets \cos\left(\frac{2\pi k}{N}\right) - i \sin\left(\frac{2\pi k}{N}\right)$
+    \EndFor
+    \State \Return $W$
+\EndProcedure
+
+\Statex
+
+\Procedure{FFT-With-Table}{$A, N, W$}
+    \State \Call{Bit-Reverse-Permutation}{$A, N$}
+    
+    \For{$s \gets 1$ \textbf{to} $\log_2 N$} \Comment{Stage loop}
+        \State $m \gets 2^s$ \Comment{Sub-transform size}
+        \State $step \gets N / m$ \Comment{Stride to sample twiddles from global table}
+        
+        \For{$k \gets 0$ \textbf{to} $N - 1$ \textbf{step} $m$} \Comment{Block loop}
+            \For{$j \gets 0$ \textbf{to} $m/2 - 1$} \Comment{Butterfly loop}
+                \State $twiddle \gets W[j \cdot step]$ \Comment{$\mathcal{O}(1)$ table lookup}
+                \State $t \gets twiddle \cdot A[k + j + m/2]$
+                \State $u \gets A[k + j]$
+                
+                \State $A[k + j] \gets u + t$
+                \State $A[k + j + m/2] \gets u - t$
+            \EndFor
+        \EndFor
+    \EndFor
+    \State \Return $A$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\subsubsection{Mixed Radix Fast Fourier Transform}
+\begin{algorithm}[H]
+\caption{General Mixed-Radix Cooley--Tukey FFT (On-the-Fly Twiddles)}
+\label{alg:mixed_radix_onthefly}
+\begin{algorithmic}[1]
+\Require Sequence $x[0 \dots N-1]$, factors $N_1, N_2$ such that $N = N_1 \times N_2$
+\Ensure Transformed frequency array $X[0 \dots N-1]$
+
+\Procedure{Mixed-Radix-FFT}{$x, N_1, N_2$}
+    \State Allocate 2D matrices $A[0 \dots N_1-1][0 \dots N_2-1]$ and $B[0 \dots N_1-1][0 \dots N_2-1]$
+    \State Allocate 1D array $X[0 \dots N-1]$
+    \State $N \gets N_1 \cdot N_2$
+
+    \Comment{Step 1: Map 1D input into $N_1 \times N_2$ matrix}
+    \For{$n_1 \gets 0$ \textbf{to} $N_1 - 1$}
+        \For{$n_2 \gets 0$ \textbf{to} $N_2 - 1$}
+            \State $A[n_1][n_2] \gets x[n_1 \cdot N_2 + n_2]$
+        \EndFor
+    \EndFor
+
+    \Comment{Step 2: $N_2$ independent column DFTs of size $N_1$}
+    \For{$n_2 \gets 0$ \textbf{to} $N_2 - 1$}
+        \State $col \gets [A[0][n_2], A[1][n_2], \dots, A[N_1-1][n_2]]$
+        \State $col\_dft \gets \Call{DFT}{col, N_1}$
+        \For{$k_1 \gets 0$ \textbf{to} $N_1 - 1$}
+            \State $A[k_1][n_2] \gets col\_dft[k_1]$
+        \EndFor
+    \EndFor
+
+    \Comment{Step 3: Pointwise twiddle factor multiplication evaluated on the fly}
+    \For{$k_1 \gets 0$ \textbf{to} $N_1 - 1$}
+        \For{$n_2 \gets 0$ \textbf{to} $N_2 - 1$}
+            \State $W \gets \exp\left(-i \frac{2\pi}{N} \cdot k_1 \cdot n_2\right)$ \Comment{Dynamic calculation}
+            \State $A[k_1][n_2] \gets A[k_1][n_2] \cdot W$
+        \EndFor
+    \EndFor
+
+    \Comment{Step 4: $N_1$ independent row DFTs of size $N_2$}
+    \For{$k_1 \gets 0$ \textbf{to} $N_1 - 1$}
+        \State $row \gets [A[k_1][0], A[k_1][1], \dots, A[k_1][N_2-1]]$
+        \State $row\_dft \gets \Call{DFT}{row, N_2}$
+        \For{$k_2 \gets 0$ \textbf{to} $N_2 - 1$}
+            \State $B[k_1][k_2] \gets row\_dft[k_2]$
+        \EndFor
+    \EndFor
+
+    \Comment{Step 5: Read out transposed matrix into 1D output}
+    \For{$k_2 \gets 0$ \textbf{to} $N_2 - 1$}
+        \For{$k_1 \gets 0$ \textbf{to} $N_1 - 1$}
+            \State $X[k_2 \cdot N_1 + k_1] \gets B[k_1][k_2]$
+        \EndFor
+    \EndFor
+
+    \State \Return $X$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\section{Implementation} \label{sec:im}
+
+\section{The Empirical Study} \label{sec:stu}
 
 \section{Lesson learned}
 

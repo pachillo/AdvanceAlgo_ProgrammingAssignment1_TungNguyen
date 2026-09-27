@@ -6,6 +6,10 @@
 
 namespace fft {
 
+bool is_power_of_two(std::size_t n) {
+  return n > 0 && (n & (n - 1)) == 0;
+}
+
 ComplexVector 2radix_cooley_tukey(const ComplexVector& input) {
     const std::size_t n = input.size();
     if (n <= 1) {

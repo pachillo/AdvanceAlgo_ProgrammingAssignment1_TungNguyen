@@ -4,6 +4,7 @@
 #include <numbers>
 #include <vector>
 #include <cstddef>
+#include <cmath>
 
 namespace fft {
 

@@ -3,9 +3,6 @@
 #include <cmath>
 #include <numbers>
 
-using Complex = std::complex<double>;
-using ComplexVector = std::vector<Complex>;
-
 // Finds the smallest non-trivial factor of n (> 1). Returns n if n is prime.
 std::size_t find_smallest_factor(std::size_t n) {
     if (n <= 3) return n;

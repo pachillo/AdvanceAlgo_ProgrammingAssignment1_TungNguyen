@@ -1,17 +1,16 @@
 #include "fft/naive_dft.hpp"
 
-#include <cmath>
-
 namespace fft {
 
-ComplexVector naive_dft(const ComplexVector& input) {
-    const std::size_t n = input.size();
+  ComplexVector naive_dft(const ComplexVector& input) {
+    const std::size_t n = input.size(); 
+    
     if (n == 0) {
-        return {};
+      return {};
     }
 
-    ComplexVector output(n, Complex{0.0, 0.0});
-    const double n_double = static_cast<double>(n);
+  ComplexVector output(n, Complex{0.0, 0.0});
+  const double n_double = static_cast<double>(n); 
 
     for (std::size_t k = 0; k < n; ++k) {
         Complex sum{0.0, 0.0};

@@ -6,9 +6,22 @@
 \usepackage[utf8]{inputenc}   
 \usepackage{amsmath, amssymb} 
 \usepackage{graphicx}       
+\usepackage{algorithm}
+\usepackage{algpseudocode}
 \usepackage{geometry}       
 \geometry{a4paper, margin=1in}
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+\renewcommand{\algorithmiccomment}[1]{\hfill\textcolor{gray}{\# #1}}
 
+% Custom Python commands
+\newcommand{\PyDef}[2]{\State \textbf{def} \textsc{#1}(#2):}
+\newcommand{\PyFor}[2]{\State \textbf{for} #1 \textbf{in} #2:}
+\newcommand{\PyIf}[1]{\State \textbf{if} #1:}
+\newcommand{\PyElif}[1]{\State \textbf{elif} #1:}
+\newcommand{\PyElse}{\State \textbf{else}:}
+\newcommand{\PyWhile}[1]{\State \textbf{while} #1:}
+\newcommand{\PyReturn}[1]{\State \textbf{return} #1}
 % --- Title & Author ---
 \title{41052 - Advanced Algorithms \\ {\Large Programming Assignment 1 - Fast Fourier Transform}}
 \author{Tung Nguyen - 24666048}
@@ -20,15 +33,97 @@
 \pagebreak
 
 \section{A little history}
-In 1802, Napoleon Bonaparte appointed Joseph Fourier as the Prefect (top regional administrator) of the Department of Isère in Grenoble, France. There, Fourier was tasked with managing road construction and draining swamps by day. At night, Fourier spent his time investigating thermodynamics. He started by working from Newton's Law of Cooling, and eventually developed a method to convert discrete harmonic sums into a continuous integral transform pair. He presented his work in 1807 to the Institut de France, but his work was stalled by the review committee, which included Lagrange and Laplace. It is not until 1822, when Fourier was elected as Permanent Secretary of the Académie des Sciences, he bypassed the peer review process and formally introduced what would be known as the \textit{Fourier Transform} today.
+In 1802, Napoleon Bonaparte appointed Joseph Fourier as the Prefect of Isère in Grenoble, France. Managing regional public works by day, Fourier spent his nights studying heat diffusion. Starting from Newton's Law of Cooling, he showed how arbitrary functions could be broken down into trigonometric series and integral transform pairs. He presented his findings to the Institut de France in 1807, but the review committee, including Joseph-Louis Lagrange and Pierre-Simon Laplace, held it back due to doubts over mathematical rigour. Only in 1822, after becoming Permanent Secretary of the Académie des Sciences, did Fourier formally publish his treatise Théorie analytique de la chaleur, establishing the continuous Fourier Transform.
 
-The Fourier Transform was used in the continuous domain, which is not relevant to this project. The discrete version actually predate this and was not invented by Fourier! In 1754, while computing for the orbit of celestial bodies, Alexis Clairaut published what is widely considered the earliest discrete Fourier-like formula. In 1805, Carl Friedrich Gauss polished this work and created the complete \textit{Discrete Fourier Transform} and the \textit{radix-2 Fast Fourier Transform (FFT)} to compute DFT faster. All of this was to help him to interpolate the orbits of asteroids. 
+The discrete version actually predated Fourier's work. In 1759, Alexis Clairaut published an early discrete trigonometric formula while calculating celestial orbits. In 1805, Carl Friedrich Gauss refined this technique to track the paths of asteroids, effectively devising both the discrete Fourier formula and an early Fast Fourier Transform (FFT). Because Gauss recorded his findings in unpublished Latin notes, his work remained largely overlooked until long after his death.
 
-In the $20^{\text{th}}$ century, as electrical engineers and numerical analysts adapted Fourier analysis for sampled signals and digital computers, they applied Fourier's conceptual frequency-domain framework to discrete arrays. The mathematical operation was Gauss's discrete trigonometric interpolation, but it was renamed the Discrete Fourier Transform to reflect its role as the discrete counterpart to Fourier's continuous theory.
+The modern breakthrough occurred during the Cold War. As the United States and the Soviet Union negotiated nuclear test bans, verifying compliance required distinguishing clandestine underground nuclear tests from natural earthquakes. Processing the flood of discrete seismic sensor data was computationally impractical using standard matrix methods, which scaled at $\mathcal{O}(N^2)$.
+
+Physicist and defence adviser Richard Garwin recognised this bottleneck and raised it with statistician John Tukey from Princeton and Bell Labs. Tukey proposed a divide-and-conquer approach to accelerate the computation and worked with IBM mathematician James Cooley, who implemented and programmed the algorithm. Published in 1965, the Cooley–Tukey FFT slashed the computational cost to $\mathcal{O}(N \log N)$ (fundamentally, Gauss invented the same algorithm but his work went unnoticed). By that time, major countries has already created their nuclear devices and went ahead with their own testing.
+
+Nowadays, the FFT has revolutionised digital signal processing, telecommunications and numerical computing worldwide and become one of the most important algorithm in our lives, as it is used every phone and personal devices and so much more.
 
 \section{Relevant background knowledge}
+The Discrete Fourier Transform (DFT) is a functions that receive an array input of complex number and return an array with the same amount of element. The DFT can be defined as an algorithm.
+\begin{algorithm}[H]
+\caption{Discrete Fourier Transform}
+\begin{algorithmic}[1]
+\Require Input sequence $x = [x[0], x[1], \dots, x[N-1]]$ of length $N$
+\Ensure Transformed frequency array $X = [X[0], X[1], \dots, X[N-1]]$
 
+\State Allocate array $X$ of size $N$, initialised to $0$
+\For{$k \gets 0$ \textbf{to} $N - 1$}
+    \For{$n \gets 0$ \textbf{to} $N - 1$}
+        \State $\theta \gets \frac{2\pi}{N} \cdot k \cdot n$
+        \State $W \gets \cos(\theta) - i\sin(\theta)$ 
+        \State $X[k] \gets X[k] + x[n] \cdot W$
+    \EndFor
+\EndFor
+\State \Return $X$
+\end{algorithmic}
+\end{algorithm}
+Looking deeper into this algorithm, the first for loop (line 2) if grabbing every element of the input array of size $N$ (line 6, with $X[k]$). The second for loop (line 3) is also looping over size $N$ to compute for each value of array $X$. Thus, the DFT has a time complexity of $\mathcal{O}(N^2)$.
 
+The Inverse Discrete Fourier Transform (IDFT) is used for reversing a transformed array to its original array, essentially undo the DFT. It can also be described as an algorithm. 
+
+\begin{algorithm}[H]
+\caption{Inverse Discrete Fourier Transform}\label{alg:idft}
+\begin{algorithmic}[1]
+\Require Transformed frequency array $X = [X[0], X[1], \dots, X[N-1]]$ of size $N$
+\Ensure Original sequence $x = [x[0], x[1], \dots, x[N-1]]$
+
+\State Allocate array $x$ of size $N$, initialised to $0$
+
+\For{$n = 0$ \textbf{to} $N - 1$}
+    \For{$k = 0$ \textbf{to} $N - 1$}
+        \State $\theta = \frac{2\pi}{N} \cdot k \cdot n$
+        \State $W = \cos(\theta) + i\sin(\theta)$
+        \State $x[n] = x[n] + X[k] \cdot W$
+    \EndFor
+    \State $x[n] = \frac{1}{N} \cdot x[n]$
+\EndFor
+
+\State \Return $x$
+\end{algorithmic}
+\end{algorithm}
+Once again, due to the nested for loops (line 2 and 3), the IDFT has a complexity of $\mathcal{O}(N^2)$.
+
+\vspace{0.3cm}
+
+A Fast Fourier Transform (FFT) is a class of algorithms that can compute the DFT and iDFT faster than $\mathcal{O}(N^2)$. The most famous FFT algorithm is the Cooley-Tukey FFT (also known as the Radix-2 FFT) mentioned above.
+\begin{algorithm}[H]
+\caption{Cooley-Tukey Radix-2 FFT}
+\begin{algorithmic}[1]
+\Require Input sequence $x = [x[0], x[1], \dots, x[N-1]]$ of length $N = 2^m$
+\Ensure Transformed frequency array $X = [X[0], X[1], \dots, X[N-1]]$
+
+\If{$N = 1$}
+    \State \Return $x$
+\EndIf
+
+\State Allocate array $x_{even}$ of length $\frac{N}2$
+\State Allocate array $x_{odd}$ of length $\frac{N}2$
+
+\For{$k = 0$ \textbf{to} $\frac{N}2$}
+    \State $x_{even}[k] \gets x[2k]$
+    \State $x_{odd}[k] \gets x[2k + 1]$
+\EndFor
+
+\State $E \gets \text{FFT}(x_{even})$ \Comment{Recursive call on even-indexed elements}
+\State $O \gets \text{FFT}(x_{odd})$ \Comment{Recursive call on odd-indexed elements}
+
+\State Allocate array $X$ of length $N$
+
+\For{$k \gets 0$ \textbf{to} $N/2 - 1$}
+    \State $W \gets \exp\left(-i \frac{2\pi}{N} \cdot k\right)$
+    \State $t \gets W \cdot O[k]$
+    \State $X[k] \gets E[k] + t$
+    \State $X[k + N/2] \gets E[k] - t$ 
+\EndFor
+
+\State \Return $X$
+\end{algorithmic}
+\end{algorithm}
 \section{Fast Fourier Transform Implementation}
 
 \section{The Empirical Study}

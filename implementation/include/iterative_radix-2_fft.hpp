@@ -1,13 +1,9 @@
 #pragma once
 
-#include "fft/types.hpp"
+#include "types.hpp"
 
-namespace fft {
-
-bool is_power_of_two(std::size_t n);
-
-ComplexVector 2radix_cooley_tukey(const ComplexVector& input);
-
-ComplexVector i2radix_cooley_tukey(const ComplexVector& input);
-
-}  // namespace fft
+namespace algorithm {
+  bool is_power_of_two(std::size_t n);
+  ComplexVector iterative_radix2_fft(const ComplexVector& input);
+  ComplexVector iterative_radix2_ifft(const ComplexVector& input);
+}

@@ -1,11 +1,8 @@
 #pragma once
 
-#include "fft/types.hpp"
+#include "types.hpp"
 
-namespace fft {
-
-ComplexVector naive_dft(const ComplexVector& input);
-
-ComplexVector naive_idft(const ComplexVector& input);
-
-}  // namespace fft
+namespace algorithm {
+  ComplexVector naive_dft(const ComplexVector& input);
+  ComplexVector naive_idft(const ComplexVector& input);
+}

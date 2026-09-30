@@ -26,7 +26,10 @@ add_compile_options(
 # Core FFT library
 add_library(fft_lib
     src/naive_dft.cpp
-    src/cooley_tukey.cpp
+    src/recursive_radix-2_fft.cpp
+    src/iterative_radix-2_fft.cpp
+    src/mixed-radix_fft.cpp
+    src/precomputed_twiddle_fft.cpp
 )
 
 target_include_directories(fft_lib PUBLIC
@@ -40,6 +43,22 @@ target_link_libraries(fft_app PRIVATE fft_lib)
 
 # Testing
 enable_testing()
-add_executable(fft_test tests/test_fft.cpp)
+add_executable(fft_test tests/test.cpp)
 target_link_libraries(fft_test PRIVATE fft_lib)
 add_test(NAME FFT_Verification_Tests COMMAND fft_test)
+
+# Benchmarks
+add_executable(fft_bench_exp1 bench/bench_exp1.cpp)
+target_link_libraries(fft_bench_exp1 PRIVATE fft_lib)
+
+add_executable(fft_bench_exp2 bench/bench_exp2.cpp)
+target_link_libraries(fft_bench_exp2 PRIVATE fft_lib)
+
+add_executable(fft_bench_exp3 bench/bench_exp3.cpp)
+target_link_libraries(fft_bench_exp3 PRIVATE fft_lib)
+
+add_executable(fft_bench_exp4 bench/bench_exp4.cpp)
+target_link_libraries(fft_bench_exp4 PRIVATE fft_lib)
+
+add_executable(fft_bench_exp5 bench/bench_exp5.cpp)
+target_link_libraries(fft_bench_exp5 PRIVATE fft_lib)

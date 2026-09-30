@@ -1,13 +1,14 @@
 #pragma once
 
-#include "fft/types.hpp"
+#include "types.hpp"
 
-namespace fft {
+namespace algorithm {
 
 std::size_t find_smallest_factor(std::size_t n);
 
-ComplexVector cooley_tukey_fft(const ComplexVector& input);
+ComplexVector mixed_radix_fft(const ComplexVector& input);
+ComplexVector mixed_radix_fft(const ComplexVector& input, std::size_t n1, std::size_t n2);
 
-ComplexVector cooley_tukey_ifft(const ComplexVector& input);
+ComplexVector mixed_radix_ifft(const ComplexVector& input);
 
-}  // namespace fft
+}  // namespace algorithm

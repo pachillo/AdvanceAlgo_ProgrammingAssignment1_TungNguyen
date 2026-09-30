@@ -3,13 +3,13 @@
 #include <iostream>
 #include <string_view>
 
-#include "fft/cooley_tukey.hpp"
-#include "fft/naive_dft.hpp"
-#include "fft/types.hpp"
+#include "naive_dft.hpp"
+#include "recursive_radix-2_fft.hpp"
+#include "types.hpp"
 
 namespace {
 
-void print_complex_vector(std::string_view label, const fft::ComplexVector& vec) {
+void print_complex_vector(std::string_view label, const algorithm::ComplexVector& vec) {
     std::cout << label << ":\n";
     for (std::size_t i = 0; i < vec.size(); ++i) {
         const double re = vec[i].real();
@@ -25,21 +25,22 @@ void print_complex_vector(std::string_view label, const fft::ComplexVector& vec)
 
 int main() {
     std::cout << "========================================\n";
-    std::cout << " Advanced Algorithms - PA1 C++ Setup    \n";
+    std::cout << " Fast Fourier Transform   \n";
     std::cout << "========================================\n\n";
 
-    const fft::ComplexVector input = {{1.0, 0.0}, {2.0, 0.0}, {3.0, 0.0}, {4.0, 0.0}};
+    // Try with your input array here
+    const algorithm::ComplexVector input = {{1.0, 0.0}, {2.0, 0.0}, {3.0, 0.0}, {4.0, 0.0}};
 
     print_complex_vector("Input Signal", input);
 
-    const auto dft_result = fft::naive_dft(input);
+    const auto dft_result = algorithm::naive_dft(input);
     print_complex_vector("DFT Result (Naive O(N^2))", dft_result);
 
-    const auto fft_result = fft::cooley_tukey_fft(input);
-    print_complex_vector("FFT Result (Cooley-Tukey O(N log N))", fft_result);
+    const auto fft_result = algorithm::recursive_radix2_fft(input);
+    print_complex_vector("FFT Result (Recursive Cooley-Tukey O(N log N))", fft_result);
 
-    const auto ifft_result = fft::cooley_tukey_ifft(fft_result);
-    print_complex_vector("Reconstructed Signal (Cooley-Tukey IFFT)", ifft_result);
+    const auto ifft_result = algorithm::recursive_radix2_ifft(fft_result);
+    print_complex_vector("Reconstructed Signal (Recursive IFFT)", ifft_result);
 
     std::cout << "Run successful!\n";
     return 0;

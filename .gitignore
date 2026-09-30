@@ -12,6 +12,11 @@ compile_commands.json
 *.so
 *.out
 
+# Python virtual environment
+implementation/bench/.venv/
+.venv/
+__pycache__/
+
 # LaTeX build artifacts
 report/build/
 *.aux

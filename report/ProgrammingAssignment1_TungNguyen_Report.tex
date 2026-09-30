@@ -611,7 +611,7 @@ The double loop (Lines~19--24) multiplies each entry by a twiddle factor, execut
 
 The algorithm executes $N_1$ independent sub-DFTs of size $N_2$ (Lines~26--31). Under direct DFT evaluation, this consumes $N_1 \cdot \mathcal{O}(N_2^2) = \mathcal{O}(N \cdot N_2)$ operations (or $\mathcal{O}(N \log N_2)$ via FFT).
 
-Summing these contributions yields a total time complexity of $\mathcal{O}(N(N_1 + N_2))$ when using standard DFT sub-routines. When $N_1$ and $N_2$ are composite and solved recursively using FFT kernels, the total runtime reaches the optimal $\mathcal{O}(N \log N)$. In terms of auxiliary space, storing the intermediate matrices $A$, $B$, and the output array $X$ (Lines~2--3) requires $\mathcal{O}(N_1 N_2) = \mathcal{O}(N)$ additional memory, and the total space complexity is $\mathcal{O}(N)$.
+Summing these contributions yields a total time complexity of $\mathcal{O}(N(N_1 + N_2))$ when using standard DFT sub-routines. When $N_1$ and $N_2$ are composite and solved recursively using FFT kernels, the total runtime reaches the optimal $\mathcal{O}(N \log N)$. One thing to note is if $N$ is prime, then $N = 1 \cdot N$, which mean this cannot be arranged into a matrix and hence the complexity would just be $\mathcal{O}(N^2)$. In terms of auxiliary space, storing the intermediate matrices $A$, $B$, and the output array $X$ (Lines~2--3) requires $\mathcal{O}(N_1 N_2) = \mathcal{O}(N)$ additional memory, and the total space complexity is $\mathcal{O}(N)$.
 \begin{algorithm}[H]
 \caption{Mixed-Radix IFFT}
 \begin{algorithmic}[1]
@@ -672,24 +672,127 @@ This is section will discuss about how the pseudocodes are coded. To keep it con
 \paragraph{Programming Language Choice}~{}\\ 
 The main language to implement the algorithm is \texttt{C++}. The reason for this is it is a compiled language, which mean the runtime would be more consistent than interpret language. It also does not have a garbage collector, so no runtime boxing of floats. Finally, it just very fast and low level, which can capture the cache performance better. \texttt{Python} is chosen as the benchmarking language due to its ability to draw graphs and easy input/output management.
 
-\subsection{Header file preparation}
+\subsection{Architecture \& Repository Navigation }
+Within \texttt{implementation/}:
+\begin{itemize}
+  \item \texttt{include/}: This is where the headers and clean interfaces live.
+  \item \texttt{src/}: The actual \texttt{C++} implementation of the above mentioned algorithms.
+  \item \texttt{tests/}: Automated unit tests and correctness validation.
+  \item \texttt{bench/}: The experiments and results.
+\end{itemize}
+
+To represent complex numbers, the type \texttt{Complex} declared.
+\subsection{Data Representation \& Hardware Cache Alignment}
+The type declaration can be found in \texttt{include/types.hpp}.
 \begin{lstlisting}[style=latte-cpp]
 using Complex = std::complex<double>;  
 using ComplexVector = std::vector<Complex>;
-inline constexpr double PI = std::numbers::pi;
+\end{lstlisting}
+The primary array container is defined as:
+\begin{center}
+\texttt{using ComplexVector = std::vector<std::complex<double>>;}
+\end{center}
+Under the ISO C++ standard (\S 26.4), the class template \texttt{std::complex<T>} is guaranteed to be binary layout-compatible with a two-element array \texttt{T[2]}. Specifically, the imaginary part immediately follows the real part in memory with zero padding. Combined with \texttt{std::vector}, which allocates elements in a single contiguous heap buffer, the entire signal of length $N$ is laid out linearly:
+\begin{equation}
+\label{eq:memory_layout}
+\text{Memory Buffer} = \underbrace{\big[ \text{Re}_0, \, \text{Im}_0 \big]}_{\text{Element } 0 \text{ (16 B)}} \, 
+                       \underbrace{\big[ \text{Re}_1, \, \text{Im}_1 \big]}_{\text{Element } 1 \text{ (16 B)}} \, 
+                       \underbrace{\big[ \text{Re}_2, \, \text{Im}_2 \big]}_{\text{Element } 2 \text{ (16 B)}} \, 
+                       \dots \, 
+                       \underbrace{\big[ \text{Re}_{N-1}, \, \text{Im}_{N-1} \big]}_{\text{Element } N-1 \text{ (16 B)}}
+\end{equation}
 
-inline bool is_power_of_two(std::size_t n) {
-    return n > 0 && (n & (n - 1)) == 0;
+Moreover, on x86-64 processors, the L1, L2, and L3 data caches operate on chunks of $64$ bytes (a single cache line). Since each \texttt{std::complex<double>} occupies:
+\begin{equation}
+2 \times 8\text{ bytes (IEEE 754 double precision)} = 16\text{ bytes},
+\end{equation}
+a single $64$-byte cache line holds exactly 4 contiguous complex samples:
+\begin{center}
+\begin{tabular}{|c|c|c|c|}
+\hline
+\textbf{Sample $k$} (16 B) & \textbf{Sample $k+1$} (16 B) & \textbf{Sample $k+2$} (16 B) & \textbf{Sample $k+3$} (16 B) \\
+\hline
+\multicolumn{4}{|c|}{$\longleftarrow$ \textbf{One 64-Byte CPU Cache Line} $\longrightarrow$} \\
+\hline
+\end{tabular}
+\end{center}
+In the early stages of the iterative FFT (e.g., $m = 2$ and $m = 4$), butterfly operations access adjacent indices ($k$ and $k+1$). When the CPU reads sample $k$ from memory, the hardware cache line fills and prefetchers automatically bring samples $k+1, k+2,$ and $k+3$ into L1 cache with zero additional latency. Moreover, in languages such as \texttt{Java} or \texttt{Python}, an array of complex numbers is typically an array of object pointers, requiring an extra pointer dereference per access and scattering memory allocations across the heap. The flat \texttt{C++} representation ensures purely contiguous memory access without heap boxing.
+
+\subsection{Practical changes}
+Given the above mentioned pseudocodes as the textbook definitions, several changes were made in the code to make it more practical. 
+\subsubsection{Reusing FFT for IFFT}
+In \texttt{src/mixed-radix\_fft.cpp}
+\begin{lstlisting}[style=latte-cpp]
+ComplexVector conjugated(n);
+ComplexVector conjugated(n);
+for (std::size_t i = 0; i < n; ++i) {
+  conjugated[i] = std::conj(input[i]);
+}
+ComplexVector res = mixed_radix_fft(conjugated);
+\end{lstlisting}
+
+and \texttt{recursive\_radix-2\_fft.cpp}, 
+\begin{lstlisting}[style=latte-cpp]
+ComplexVector conjugated(n);
+for (std::size_t i = 0; i < n; ++i) {
+  conjugated[i] = std::conj(input[i]);
+}
+ComplexVector res = recursive_radix2_fft(conjugated);
+\end{lstlisting}
+Instead of rewriting a entire new function to compute IFFT, these two files just compute the conjugate of the array, pass them through the FFT (which function the same), and then normalise each element. This reduce code redundancy. However, this approach requires two additional $\mathcal{O}(N)$ passes across the array (one to compute the conjugate, one to normalise the array). For large datasets that exceed the CPU cache capacity, traversing the entire sequence in memory two extra times increase memory traffic. So a single pass via a dedicate IFFT function would reduce the load on the cache capacity. The reason for this is because for the two mentioned algorithm, they both use recursion, which already allocates arrays per call, the conjugate can eliminate code duplication. Particularly, for the Mixed Radix FFT, rewrite the entire long function was quite redundant. 
+
+\subsubsection{Code wrappers}
+In \texttt{src/mixed\_radix\_fft.cpp} and \texttt{precomputed\_twiddle\_fft.cpp}, there are function with the same name but different input. For example, 
+\begin{lstlisting}[style=latte-cpp]
+ComplexVector precomputed_twiddle_fft(const ComplexVector& input, const ComplexVector& W) {
+  \\ Long code 
+} 
+
+ComplexVector precomputed_twiddle_fft(const ComplexVector& input) {
+  \\ Shorter code
+}
+\end{lstlisting}
+Heuristically, the one function with less input and shorter code is the wrapper. They help with being convenient when called, and the main function (the longer code with more input) can be read easier. Moreover, it is simply a single pass with no copy, so it does not worsen memory passes in this case.
+
+\subsubsection{Smart finding factor function}
+In \texttt{src/mixed\_radix\_fft.cpp}, 
+\begin{lstlisting}[style=latte-cpp]
+std::size_t find_smallest_factor(std::size_t n) {
+    if (n <= 3)
+        return n;
+    if (n % 2 == 0)
+        return 2;
+    if (n % 3 == 0)
+        return 3;
+
+    // According to the division algorithm theorem,
+    // for every 6 numbers, 4 of them are composite
+    for (std::size_t i = 5; i * i <= n; i += 6) {
+        if (n % i == 0)
+            return i;
+        if (n % (i + 2) == 0)
+            return i + 2;
+    }
+    return n;  // n is prime
+}\end{lstlisting}
+To compute this algorithm, we must decompose $N$ into two factors $N = N_1 \times N_2$, and the most efficient approach is to choose $N_1$ as the smallest prime factor of $N$. This prevents redundant trial division by composite multiples (for example, if $N$ is not divisible by 2, testing 4 or 6 is unnecessary). 
+
+According to the division algorithm, all integers can be expressed in the form $6k + r$ where $r \in \{0, 1, 2, 3, 4, 5\}$. For any integer $k$, numbers with remainders $0, 2, 3,$ and $4$ are divisible by 2 or 3 and are therefore guaranteed to be composite for values greater than 3. Consequently, all prime numbers greater than 3 must take the form $6k \pm 1$. Exploiting this property, the loop skips the four guaranteed composite residue classes in each block of six and only tests the two potential prime candidates ($i$ and $i+2$), stepping by $6$ each iteration.
+
+\subsubsection{Catching error}
+Throughout the codes in \texttt{src/}, there are various safe guard to guarantee that the algorithm can proceed according to its constraint smoothly. For example in \texttt{iterative\_radix-2\_fft.cpp}, 
+\begin{lstlisting}[style=latte-cpp]
+if (!is_power_of_two(n)) {
+  throw std::invalid_argument("Input array size must be a power of 2 for Radix-2 FFT");
 }
 \end{lstlisting}
 
-Other than including the needed libraries, a type Complex is declared to be a double, with a real part (first), and imaginary part (second). Then the type ComplexVector is a vector that contains the Complex types. The PI is just $\pi$, and the function is\_power\_of\_two is to check if a number is indeed a power of 2. 
+\section{The Experiments}
 
-Other than that, the rest of the header file are just function declaration. 
 
-\section{The Empirical Study} \label{sec:stu}
+\section{The Empirical Study} 
 
-\section{Lesson learned}
+\section{What I learned}
 
 \section{AI usage Declaration}
 

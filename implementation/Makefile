@@ -91,10 +91,22 @@ bench5-plot: bench-env
 
 bench5-all: bench5 bench5-plot
 
+# Experiment 6 Targets
+bench6-build: build
+
+bench6: bench6-build
+	@mkdir -p bench/results
+	@./$(BUILD_DIR)/fft_bench_exp6 bench/results/experiment6.csv
+
+bench6-plot: bench-env
+	@$(VENV_PYTHON) bench/plot_exp6.py bench/results/experiment6.csv
+
+bench6-all: bench6 bench6-plot
+
 # Run All Experiments Target
-bench-suite: bench-all bench2-all bench3-all bench4-all bench5-all
+bench-suite: bench-all bench2-all bench3-all bench4-all bench5-all bench6-all
 	@echo "=========================================="
-	@echo " All 5 benchmarks completed successfully! "
+	@echo " All 6 benchmarks completed successfully! "
 	@echo "=========================================="
 
 format:
@@ -125,6 +137,10 @@ help:
 	@echo "  make bench5     - Run Experiment 5 benchmark (Numerical Precision Drift)"
 	@echo "  make bench5-plot- Generate Experiment 5 plot (Reconstruction error vs. N, PNG)"
 	@echo "  make bench5-all - Run Experiment 5 benchmark and plot"
+	@echo "  make bench6     - Run Experiment 6 benchmark (Prime vs. Composite Mixed-Radix)"
+	@echo "  make bench6-plot- Generate Experiment 6 plot (Time & Speedup vs. N, PNG)"
+	@echo "  make bench6-all - Run Experiment 6 benchmark and plot"
+	@echo "  make bench-suite- Run all 6 benchmarks and generate all plots"
 	@echo "  make bench-env  - Set up Python virtual environment"
 	@echo "  make format     - Format all source files with clang-format"
 	@echo "  make clean      - Remove build directory"

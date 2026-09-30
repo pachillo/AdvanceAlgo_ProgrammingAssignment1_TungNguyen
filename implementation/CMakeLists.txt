@@ -62,3 +62,6 @@ target_link_libraries(fft_bench_exp4 PRIVATE fft_lib)
 
 add_executable(fft_bench_exp5 bench/bench_exp5.cpp)
 target_link_libraries(fft_bench_exp5 PRIVATE fft_lib)
+
+add_executable(fft_bench_exp6 bench/bench_exp6.cpp)
+target_link_libraries(fft_bench_exp6 PRIVATE fft_lib)

@@ -13,6 +13,7 @@
 \usepackage{xcolor}
 \usepackage{listings}
 \usepackage{inconsolata}
+\usepackage{tikz}
 
 % --- Catppuccin Latte Color Definitions ---
 \definecolor{latteBase}{HTML}{EFF1F5}     % #eff1f5 (Background)
@@ -98,7 +99,7 @@ Physicist and defence adviser Richard Garwin recognised this bottleneck and rais
 Nowadays, the FFT has revolutionised digital signal processing, telecommunications and numerical computing worldwide, thus becoming one of the most important algorithm in our lives.
 
 \section{Relevant background knowledge}
-This project will be implementing and studying seven relevant algorithms. 
+This project will be implementing and studying five relevant algorithms. 
 \begin{enumerate}
   \item Standard Discrete Fourier Transform
   \item Iterative Radix-2 Fast Fourier Transform (FFT)
@@ -108,7 +109,7 @@ This project will be implementing and studying seven relevant algorithms.
 \end{enumerate}
 This section will discuss the theoretical background of the above mentioned methods, mainly how to implement the algorithms and their complexity.
 \subsection{Discrete Fourier Transform}
-The Discrete Fourier Transform (DFT) is a function that receives an array of complex numbers $x = (x_0, x_1, \dots, x_{N-1})$ and returns a transformed frequency array $X = (X_0, X_1, \dots, X_{N-1})$. Formally, the DFT is defined as:
+The Discrete Fourier Transform (DFT) is a function that receives an array of complex numbers $x = (x_0, x_1, \dots, x_{N-1})$ and returns a transformed frequency array $X = (X_0, X_1, \dots, X_{N-1})$ \cite{oppenheim1989discrete}. Formally, the DFT is defined as:
 \begin{equation}\label{eq:2}
   X_k = \sum_{j=0}^{N-1} x_j \cdot W ,
 \end{equation}
@@ -135,31 +136,31 @@ The DFT can be defined as an algorithm.
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
-Looking deeper into this algorithm, the first for loop (line 2) is going over every element of the input array of size $N$ (line 6, with $X[k]$). The nested for loop (line 3) is also looping over size $N$ to compute for each value of array $X$. Thus, the DFT has a time complexity of $\mathcal{O}(N^2)$. 
- For simplicity sake, we can interpret an abstraction of the DFT as follows:
-
- \begin{algorithm}[H]
- \caption{Discrete Fourier Transform in a nut shell}
- \label{al:nut}
- \begin{algorithmic}[1]
- \Require Array $x[0 \dots N-1]$ of complex numbers, length $N$
- \Ensure Transformed array $X[0 \dots N-1]$
-
- \Procedure{DFT}{$x, N$}
-     \State Allocate array $X[0 \dots N-1]$ initialised to $0$
-
-     \For{$k \gets 0$ \textbf{to} $N - 1$}
-         \For{$j \gets 0$ \textbf{to} $N - 1$}
-         \State $x[j] \to \textbf{Black box} \to X[k]$ 
-         \EndFor
-     \EndFor
-
-     \State \Return $X$
- \EndProcedure
- \end{algorithmic}
- \end{algorithm}
- Now, we can interpret the DFT as just a for loop, followed by a for loop, both looping over an array. The operation at line 5 does not matter to us (only keep this in mind for simpler explanation why the following FFT works). Notice that for each $k$, there are $N$ sub-results.
-
+% Looking deeper into this algorithm, the first for loop (line 2) is going over every element of the input array of size $N$ (line 6, with $X[k]$). The nested for loop (line 3) is also looping over size $N$ to compute for each value of array $X$. Thus, the DFT has a time complexity of $\mathcal{O}(N^2)$. 
+%  For simplicity sake, we can interpret an abstraction of the DFT as follows:
+%
+%  \begin{algorithm}[H]
+%  \caption{Discrete Fourier Transform in a nut shell}
+%  \label{al:nut}
+%  \begin{algorithmic}[1]
+%  \Require Array $x[0 \dots N-1]$ of complex numbers, length $N$
+%  \Ensure Transformed array $X[0 \dots N-1]$
+%
+%  \Procedure{DFT}{$x, N$}
+%      \State Allocate array $X[0 \dots N-1]$ initialised to $0$
+%
+%      \For{$k \gets 0$ \textbf{to} $N - 1$}
+%          \For{$j \gets 0$ \textbf{to} $N - 1$}
+%          \State $x[j] \to \textbf{Black box} \to X[k]$ 
+%          \EndFor
+%      \EndFor
+%
+%      \State \Return $X$
+%  \EndProcedure
+%  \end{algorithmic}
+%  \end{algorithm}
+%  Now, we can interpret the DFT as just a for loop, followed by a for loop, both looping over an array. The operation at line 5 does not matter to us (only keep this in mind for simpler explanation why the following FFT works). Notice that for each $k$, there are $N$ sub-results.
+%
 \
 
 The Inverse Discrete Fourier Transform (IDFT) is used for reversing a transformed array to its original array, essentially undo the DFT. It can also be described as an algorithm. 
@@ -203,7 +204,7 @@ The Fast Fourier Transform is a class of algorithms that can compute the DFT and
 % \end{equation}
 % where $W_N^k = \cos\left(\frac{2\pi k}{N}\right) - i \sin\left(\frac{2\pi k}{N}\right)$, and the kernel $W_{N/2}^{mk} = \cos\left(\frac{2\pi km}{N/2}\right) - i \sin\left(\frac{2\pi km}{N/2}\right)$ corresponds to a sub-DFT of size $N/2$. Thus, any reduction to this would be equivalent to the original DFT.
 \subsubsection{Iterative Radix-2 FFT}~{}\\
-The iterative version runs with the help of the Bit Reversal Permutation (BRP) algorithm. The BRP essentially loop over an array, for each index it flips the binary (e.g. $001 \mapsto 100, 110 \mapsto 011$), and move the current value to its new index. 
+The iterative version runs with the help of the Bit Reversal Permutation (BRP) algorithm \cite{thomas2009introduction}. The BRP essentially loop over an array, for each index it flips the binary (e.g. $001 \mapsto 100, 110 \mapsto 011$), and move the current value to its new index. 
 \begin{algorithm}[H]
 \caption{Bit-Reversal Permutation}
 \label{alg:bit_reversal_arithmetic}
@@ -282,23 +283,85 @@ Original Index ($i$) & Binary ($b_2 b_1 b_0$) & Reversed ($b_0 b_1 b_2$) & Permu
 \end{algorithmic}
 \end{algorithm}
 \paragraph{Equivalence}~{}\\
-To see why this FFT is equivalent to the DFT, we need to abstract according to algorithm \ref{al:nut}.
+The Radix-2 FFT operates based on the divide-and-conquer strategy, by keep separating the even and odd indices. For example,
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    level distance=1.3cm,
+    level 1/.style={sibling distance=7.0cm},
+    level 2/.style={sibling distance=3.5cm},
+    level 3/.style={sibling distance=1.75cm},
+    node_box/.style={
+        draw,
+        rounded corners=2pt,
+        font=\small\ttfamily,
+        fill=gray!5,
+        inner sep=3.5pt
+    },
+    edge from parent/.style={draw, ->, thick, gray!80},
+    level_lbl/.style={
+        font=\small\bfseries,
+        text=black!70,
+        anchor=east
+    }
+]
+
+% Level labels on the left
+\node[level_lbl] at (-7.2,  0.0) {Level 0:};
+\node[level_lbl] at (-7.2, -1.3) {Level 1:};
+\node[level_lbl] at (-7.2, -2.6) {Level 2:};
+\node[level_lbl] at (-7.2, -3.9) {Level 3:};
+
+% Root node
+\node[node_box] {[0, 1, 2, 3, 4, 5, 6, 7]}
+    child {
+        node[node_box] {[0, 2, 4, 6]}
+        child {
+            node[node_box] {[0, 4]}
+            child { node[node_box] {[0]} }
+            child { node[node_box] {[4]} }
+        }
+        child {
+            node[node_box] {[2, 6]}
+            child { node[node_box] {[2]} }
+            child { node[node_box] {[6]} }
+        }
+    }
+    child {
+        node[node_box] {[1, 3, 5, 7]}
+        child {
+            node[node_box] {[1, 5]}
+            child { node[node_box] {[1]} }
+            child { node[node_box] {[5]} }
+        }
+        child {
+            node[node_box] {[3, 7]}
+            child { node[node_box] {[3]} }
+            child { node[node_box] {[7]} }
+        }
+    };
+
+\end{tikzpicture}
+\caption{Divide-and-conquer decomposition of an $N=8$ sequence into bit-reversed leaf order.}
+\label{fig:radix2_tree}
+\end{figure}
+The Iterative Radix-2 FFT essentially apply the twiddles from the bottom up.
 With the BRP, the array is laid out in the form of leaf nodes of the recursion tree sequentially in memory so we can build upward with simple loops. From the example in Table \ref{tab:bit_reversal}, we can have 
 \begin{center}
   $\{x_0,x_1,x_2,x_3,x_4,x_5,x_6,x_7\} \mapsto \{x_0, x_4, x_2, x_6, x_1, x_5, x_3, x_7\}$.
 \end{center}
-Notice that $m=2^s$ with $s$ starting from 1. Visually, at $s=1, m = 2$, we have 
+Notice that $m=2^s$ with $s$ starting from 1. This is essentially level 3 from Figure 1. Visually, at $s=1, m = 2$, we have 
 \begin{center}
 $\Big( x_0 \oplus x_4 \Big), \Big( x_2 \oplus x_6 \Big), \Big( x_1 \oplus x_5 \Big), \Big( x_3 \oplus x_7 \Big)$
 \end{center}
 We know that the first pair is using indices 0 and 1, the second is using 2 and 3, and so on. So each pair is using an even and an odd index. In each pair, the first element acts as the \emph{even} sub-result and the second acts as the \emph{odd} sub-result. Applying a single black box operation to each pair combines these four adjacent pairs into four independent $2$-point DFT solutions, fully updated in-place.
 
-Next, at $s = 2$ ($m = 4$), the problem size doubles. The algorithm \emph{merges} adjacent pairs of these $2$-point solutions into $4$-point solutions:
+Next, at $s = 2$ ($m = 4$), the problem size doubles (level 2). The algorithm \emph{merges} adjacent pairs of these $2$-point solutions into $4$-point solutions:
 \begin{center}$\Big( [x_0, x_4] \oplus [x_2, x_6] \Big), \Big( [x_1, x_5] \oplus [x_3, x_7] \Big)$\end{center}
 
 Here, the first pair $x_0, x_4$ represents the even-indexed frequency components, while $x_2, x_6$ represents the odd ones. The loop runs two butterflies ($j = 0, 1$) across an offset of $m/2 = 2$ slots in memory, updating each block into a valid $4$-point DFT.
 
-Finally, at $s = 3$ ($m = 8$), the algorithm performs the last merge step:\begin{center}$\Big( [x_0, x_4, x_2, x_6] \oplus [x_1, x_5, x_3, x_7] \Big)$\end{center}The left block contains all even values of the original array, and the right block contains all odd values. Running four butterflies ($j = 0, 1, 2, 3$) across an offset of $m/2 = 4$ combines them into the final, complete $8$-point DFT array.
+Finally, at level 1, at $s = 3$ ($m = 8$), the algorithm performs the last merge step:\begin{center}$\Big( [x_0, x_4, x_2, x_6] \oplus [x_1, x_5, x_3, x_7] \Big)$\end{center}The left block contains all even values of the original array, and the right block contains all odd values. Running four butterflies ($j = 0, 1, 2, 3$) across an offset of $m/2 = 4$ combines them into the final, complete $8$-point DFT array.
 
 Since each stage simply merges smaller, already-transformed sub-arrays into larger ones (same as bottom-up Merge Sort). The loops mathematically evaluate the exact same divide-and-conquer tree as the recursive DFT definition.
 
@@ -326,12 +389,12 @@ W_{N/2}^{m(k+m/2)} = W^{mk}_{N/2} \cdot \left(W^{m/2}_{N/2}\right)^m = W^{mk}_{N
 $$
 Note that after the iteration, which is when this FFT is completed, $m = 2^{\log_2N} = N$. Thus, 
 $$
-W^{m/2}_{N/2} = W^{N/2}_{N/2} = \cos\left(-2 \pi \cdot \frac{\frac{N}{2}}{\frac{N}{2}}\right)  -j \sin\left(-2\pi\cdot \frac{\frac{N}{2}}{\frac{N}{2}}\right) = 1.
+W^{m/2}_{N/2} = W^{N/2}_{N/2} = \cos\left(-2 \pi \cdot \frac{\frac{N}{2}}{\frac{N}{2}}\right)  -i \sin\left(-2\pi\cdot \frac{\frac{N}{2}}{\frac{N}{2}}\right) = 1.
 $$
 Thus, $E_k = E_{k+m/2}$.
 Same holds true for $O_k = O_{k+m/2}$. As for $W^k_m$, we have 
 $$
-W^{k+m/2}_m = W^{k}_m \cdot W^{m/2}_m = W^{k}_m \cdot \left[\cos\left(2\pi\cdot \frac{m}{\frac{m}{2}}\right) -j \sin\left(2\pi\cdot \frac{m}{\frac{m}{2}}\right)\right] = W^{k}_m \cdot -1 =- W^{k}_m.
+W^{k+m/2}_m = W^{k}_m \cdot W^{m/2}_m = W^{k}_m \cdot \left[\cos\left(2\pi\cdot \frac{-m/2}{m}\right) -i \sin\left(-2\pi\cdot \frac{m/2}{m}\right)\right] = W^{k}_m \cdot -1 =- W^{k}_m.
 $$ Therefore, line 13 is valid.
 \paragraph{Complexity}~{}\\
 Looking deeper into the Iterative version of the Radix-2 FFT, the first part of the algorithm is spent running the BRP algorithm, which first cost $\mathcal{O}(N)$ looping over the entire array. And a nested for loop inside that cost $\mathcal{O}(\log_2N)$. In total, the BRP algorithm cost $\mathcal{O}(N\log_2N)$. Next, the algorithm loops (line 4) over $\log_2N$ times, followed by a nested loop (line 7) of $\frac{N}{m}$ times (indicated by the \textbf{step} $m$), followed by another nested loop (line 9) of $\frac{m}{2}$ times. In total, this FFT algorithm cost $\mathcal{O}\left(N\log_2N + \log_2N \cdot \frac{N}{m} \cdot \frac{m}{2}\right) = \mathcal{O}(N\log_2N)$. Also, since this is in-place, the space complexity only needs to account for the original input, which is $\mathcal{O}(N)$.
@@ -343,7 +406,7 @@ Looking deeper into the Iterative version of the Radix-2 FFT, the first part of 
 \Ensure Original array $x[0 \dots N-1]$
 
 
-\Procedure{FFT}{$x, N$}
+\Procedure{IFFT}{$x, N$}
 \State $m \gets \log_2 N$
 \State \Call{Bit-Reverse-Permutation}{$x, N$}
 
@@ -372,7 +435,7 @@ Looking deeper into the Iterative version of the Radix-2 FFT, the first part of 
 \end{algorithmic}
 \end{algorithm}
 \subsubsection{Recursive Radix-2 FFT}~{}\\
-This is simply a recursive version of the above FFT, so the mathematical derivative is the same.
+This is simply a recursive version of the above FFT, so the mathematical derivation is the same.
 \begin{algorithm}[H]
 \caption{Recursive Radix-2 FFT}
 \label{alg:recursive_radix2_fft}
@@ -410,13 +473,13 @@ This is simply a recursive version of the above FFT, so the mathematical derivat
 \end{algorithmic}
 \end{algorithm}
 \paragraph{Equivalence}~{}\\
-The recursive Radix-2 FFT computes the exact same result as the DFT by framing it as a top-down divide-and-conquer problem. Instead of evaluating all frequency components at once, it de-interleaves the input signal into two smaller sequences containing only the even-indexed and odd-indexed samples. Then, it recursively compute the sub-DFTs for each half until reaching the trivial base case of single-element arrays. 
+The recursive Radix-2 FFT computes the exact same result as the DFT by framing it as a top-down divide-and-conquer problem (level 1 to 3). Instead of evaluating all frequency components at once, it de-interleaves the input signal into two smaller sequences containing only the even-indexed and odd-indexed samples. Then, it recursively compute the sub-DFTs for each half until reaching the trivial base case of single-element arrays. 
 
 Since shifting a sequence in time corresponds to a phase rotation in frequency, the odd sub-transform is multiplied by a twiddle factor to account for its one-sample time offset. Finally, it exploit the circular symmetry of frequencies the $u-t$ proof above). The algorithm reconstructs the full-length DFT by simultaneously computing the first half of the array through addition and the second half through subtraction, precisely reproducing the mathematical sum of the full $N$-point DFT.
 
 \paragraph{Complexity}~{} \\
 The Recursive version of the Radix-2 FFT first copy into two arrays $x_{even}$ and $x_{odd}$ (line 6 to 8), with each costing $\mathcal{O}\left(\frac{N}{2}\right)$. Then, it recursively called with inputs of size $\frac{N}{2}$ two times (line 9 and 10), each time costing $T\left(\frac{N}{2}\right)$ (since it's recursion, we cannot use Big $\mathcal{O}$ right away). Finally, the algorithm loop over $\frac{N}{2}$ times (line 12). Thus, the entire algorithm cost $$T(N) = 2\mathcal{O}\left(\frac{N}{2}\right) + 2T\left(\frac{N}{2}\right) + \mathcal{O}\left(\frac{N}{2}\right) = \mathcal{O}\left({N}\right) + 2T\left(\frac{N}{2}\right).$$
-According to the Master Theorem, we have
+According to the Master Theorem \cite{thomas2009introduction}, we have
 $$T(N) = a \, T\left(\frac{N}{b}\right) + f(N).$$
 It is clear that $f(n) = \mathcal{O}(N)$. Moreover, $a = 2, b = 2 \Rightarrow N^{\log_22} = N$. This matches with the case 2 of the Master Theorem. Therefore,
 $$T(N) = \mathcal{O}(N\log_2N).$$
@@ -457,7 +520,7 @@ In terms of space complexity, due to the allocation of $E$ and $O$, both are $N/
 \end{algorithmic}
 \end{algorithm}
 \subsubsection{Optimising with Precomputed Twiddle}
-On paper, a small optimisation can be done by pre-computing the twiddles factor ($W$) first. Since a major part of the FFT is to compute the twiddles, naturally having not to deal with them in the actual algorithm is faster.
+On paper, a small optimisation can be done by pre-computing the twiddles factor ($W$) first \cite{frigo2005design}. Since a major part of the FFT is to compute the twiddles, naturally having not to deal with them in the actual algorithm is faster.
 
 \begin{algorithm}[H]
 \caption{Iterative Radix-2 FFT with Precomputed Twiddle Table}
@@ -477,7 +540,7 @@ On paper, a small optimisation can be done by pre-computing the twiddles factor 
 
 \Statex
 
-\Procedure{FFT}{$x, N, W$}
+\Procedure{IFFT}{$x, N, W$}
     \State \Call{Bit-Reverse-Permutation}{$X, N$}
     
     \For{$s \gets 1$ \textbf{to} $\log_2 N$} \Comment{Stage loop}
@@ -542,7 +605,7 @@ The complexity of this algorithm is the same as the Iterative Radix-2 FFT mentio
 \end{algorithm}
 
 \subsubsection{Mixed Radix Fast Fourier Transform}
-So far, the Radix-2 FFT algorithm only work when the length $N=2^m$, with $m \in \mathbb{N}$. For array with a length that wouldn't fit that constraint, a General Cooley--Tukey FFT, otherwise known as the Mixed-Radix FFT, can be applied. 
+So far, the Radix-2 FFT algorithm only work when the length $N=2^m$, with $m \in \mathbb{N}$. For array with a length that wouldn't fit that constraint, a General Cooley--Tukey FFT, otherwise known as the Mixed-Radix FFT, can be applied \cite{d3ea2d52-5ab2-3128-8b80-efb85267295d}. 
 
 \begin{algorithm}[H]
 \caption{Mixed-Radix FFT}
@@ -681,18 +744,13 @@ Within \texttt{implementation/}:
   \item \texttt{bench/}: The experiments and results.
 \end{itemize}
 
-To represent complex numbers, the type \texttt{Complex} declared.
 \subsection{Data Representation \& Hardware Cache Alignment}
 The type declaration can be found in \texttt{include/types.hpp}.
 \begin{lstlisting}[style=latte-cpp]
 using Complex = std::complex<double>;  
-using ComplexVector = std::vector<Complex>;
+using ComplexVector = std::vector<Complex>; // Defining the primary array container
 \end{lstlisting}
-The primary array container is defined as:
-\begin{center}
-\texttt{using ComplexVector = std::vector<std::complex<double>>;}
-\end{center}
-Under the ISO C++ standard (\S 26.4), the class template \texttt{std::complex<T>} is guaranteed to be binary layout-compatible with a two-element array \texttt{T[2]}. Specifically, the imaginary part immediately follows the real part in memory with zero padding. Combined with \texttt{std::vector}, which allocates elements in a single contiguous heap buffer, the entire signal of length $N$ is laid out linearly:
+Under the ISO C++ standard (\S 26.4) \cite{isocpp20}, the class template \texttt{std::complex<T>} is guaranteed to be binary layout-compatible with a two-element array \texttt{T[2]}. Specifically, the imaginary part immediately follows the real part in memory with zero padding. Combined with \texttt{std::vector}, which allocates elements in a single contiguous heap buffer, the entire signal of length $N$ is laid out linearly:
 \begin{equation}
 \label{eq:memory_layout}
 \text{Memory Buffer} = \underbrace{\big[ \text{Re}_0, \, \text{Im}_0 \big]}_{\text{Element } 0 \text{ (16 B)}} \, 
@@ -716,14 +774,13 @@ a single $64$-byte cache line holds exactly 4 contiguous complex samples:
 \hline
 \end{tabular}
 \end{center}
-In the early stages of the iterative FFT (e.g., $m = 2$ and $m = 4$), butterfly operations access adjacent indices ($k$ and $k+1$). When the CPU reads sample $k$ from memory, the hardware cache line fills and prefetchers automatically bring samples $k+1, k+2,$ and $k+3$ into L1 cache with zero additional latency. Moreover, in languages such as \texttt{Java} or \texttt{Python}, an array of complex numbers is typically an array of object pointers, requiring an extra pointer dereference per access and scattering memory allocations across the heap. The flat \texttt{C++} representation ensures purely contiguous memory access without heap boxing.
+In the early stages of the iterative FFT (e.g., $m = 2$ and $m = 4$), butterfly operations access adjacent indices ($k$ and $k+1$). When the CPU reads sample $k$ from memory, the hardware cache line fills and prefetchers automatically bring samples $k+1, k+2,$ and $k+3$ into L1 cache with zero additional latency \cite{drepper2007}. Moreover, in languages such as \texttt{Java} or \texttt{Python}, an array of complex numbers is typically an array of object pointers, requiring an extra pointer dereference per access and scattering memory allocations across the heap. The flat \texttt{C++} representation ensures purely contiguous memory access without heap boxing.
 
 \subsection{Practical changes}
 Given the above mentioned pseudocodes as the textbook definitions, several changes were made in the code to make it more practical. 
 \subsubsection{Reusing FFT for IFFT}
 In \texttt{src/mixed-radix\_fft.cpp}
 \begin{lstlisting}[style=latte-cpp]
-ComplexVector conjugated(n);
 ComplexVector conjugated(n);
 for (std::size_t i = 0; i < n; ++i) {
   conjugated[i] = std::conj(input[i]);
@@ -745,11 +802,11 @@ Instead of rewriting a entire new function to compute IFFT, these two files just
 In \texttt{src/mixed\_radix\_fft.cpp} and \texttt{precomputed\_twiddle\_fft.cpp}, there are function with the same name but different input. For example, 
 \begin{lstlisting}[style=latte-cpp]
 ComplexVector precomputed_twiddle_fft(const ComplexVector& input, const ComplexVector& W) {
-  \\ Long code 
+  // Long code 
 } 
 
 ComplexVector precomputed_twiddle_fft(const ComplexVector& input) {
-  \\ Shorter code
+  // Shorter code
 }
 \end{lstlisting}
 Heuristically, the one function with less input and shorter code is the wrapper. They help with being convenient when called, and the main function (the longer code with more input) can be read easier. Moreover, it is simply a single pass with no copy, so it does not worsen memory passes in this case.
@@ -777,7 +834,7 @@ std::size_t find_smallest_factor(std::size_t n) {
 }\end{lstlisting}
 To compute this algorithm, we must decompose $N$ into two factors $N = N_1 \times N_2$, and the most efficient approach is to choose $N_1$ as the smallest prime factor of $N$. This prevents redundant trial division by composite multiples (for example, if $N$ is not divisible by 2, testing 4 or 6 is unnecessary). 
 
-According to the division algorithm, all integers can be expressed in the form $6k + r$ where $r \in \{0, 1, 2, 3, 4, 5\}$. For any integer $k$, numbers with remainders $0, 2, 3,$ and $4$ are divisible by 2 or 3 and are therefore guaranteed to be composite for values greater than 3. Consequently, all prime numbers greater than 3 must take the form $6k \pm 1$. Exploiting this property, the loop skips the four guaranteed composite residue classes in each block of six and only tests the two potential prime candidates ($i$ and $i+2$), stepping by $6$ each iteration.
+According to the division algorithm \cite{crandall2005}, all integers can be expressed in the form $6k + r$ where $r \in \{0, 1, 2, 3, 4, 5\}$. For any integer $k$, numbers with remainders $0, 2, 3,$ and $4$ are divisible by 2 or 3 and are therefore guaranteed to be composite for values greater than 3. Consequently, all prime numbers greater than 3 must take the form $6k \pm 1$. Exploiting this property, the loop skips the four guaranteed numbers in every six numbers and only tests the two potential prime candidates ($i$ and $i+2$), stepping by $6$ each iteration.
 
 \subsubsection{Catching error}
 Throughout the codes in \texttt{src/}, there are various safe guard to guarantee that the algorithm can proceed according to its constraint smoothly. For example in \texttt{iterative\_radix-2\_fft.cpp}, 
@@ -787,15 +844,477 @@ if (!is_power_of_two(n)) {
 }
 \end{lstlisting}
 
-\section{The Experiments}
+\section{The Experiments and Empirical Study} 
+This section establishes the methodology, experimental controls, hardware environment, hypotheses used to evaluate the FFTs implementations from Section~\ref{sec:im}. These experiments reveal the interactions between algorithmic complexity ($\mathcal{O}(N^2)$ versus $\mathcal{O}(N \log N)$), hardware cache hierarchies, register pressure, and numerical stability. The results are also discussed and analysed.
+
+\subsection{Benchmarking Environment \& Measurement Rigour} \label{sec:bench_env}
+To ensure reproducibility and isolate algorithmic performance from operating system noise, all benchmarks were executed under a single controlled environment.
+
+\paragraph{Hardware Configuration}~{}\\
+Benchmarks were conducted on an x86-64 workstation with an Intel Core Ultra 7 165U processor (14 hardware threads across performance and efficiency cores). The CPU memory hierarchy is structured as follows:
+\begin{itemize}
+    \item \textbf{L1 Data Cache (L1d):} $32$--$48\text{ KiB}$ private per core, operating on 64-byte cache lines ($\approx 1\text{ ns}$ access latency).
+    \item \textbf{L2 Cache:} $2\text{ MiB}$ dedicated per performance-core cluster ($10\text{ MiB}$ total aggregate, $\approx 3$--$4\text{ ns}$ access latency).
+    \item \textbf{L3 Cache (Last-Level Cache, LLC):} $12\text{ MiB}$ unified shared cache across all execution cores ($\approx 12$--$15\text{ ns}$ access latency).
+    \item \textbf{System Memory (DRAM):} $32\text{ GiB}$ dual-channel LPDDR5 RAM operating at $6400\text{ MT/s}$ ($\approx 60$--$80\text{ ns}$ latency).
+\end{itemize}
+
+\paragraph{Compilation Toolchain}~{}\\
+The codebase was compiled using \texttt{GCC 14} under \emph{Arch} Linux (x86-64 kernel 6.x) with the flags:
+\begin{center}
+\texttt{-std=c++20 -O3 -Wall -Wextra -Wpedantic -Wconversion -Wshadow}
+\end{center}
+The \texttt{-O3} optimisation level enables loop unrolling, vector register vectorisation (AVX2/SSE4.2), and instruction scheduling while strictly preserving IEEE 754 arithmetic compliance.
+
+\paragraph{Preventing Dead-Code Elimination}~{}\\
+Under aggressive compiler optimisations (\texttt{-O3}), dead-code elimination passes can discard computation if the output is not consumed by an I/O operation. To guarantee that every butterfly operation and memory store executes without introducing I/O latency into the timer loop, a memory barrier was applied via inline assembly:
+\begin{lstlisting}[style=latte-cpp]
+template <typename T>
+inline void do_not_optimize(T&& val) {
+#if defined(__GNUC__) || defined(__clang__)
+    asm volatile("" : : "g"(val) : "memory");
+#else
+    volatile auto sink = &val;
+    (void)sink;
+#endif
+}
+\end{lstlisting}
+The \textit{memory} clobber forces the compiler to treat all global and heap memory as potentially modified. This prevents instruction hoisting or elision across the barrier.
+
+\paragraph{Warmup \& High-Resolution Timing}~{}\\
+To neutralise CPU dynamic frequency scaling artifacts (such as Intel Speed Shift and P-state transitions), each benchmark executes at least 5 untimed warmup iterations. This primes the instruction and data caches before timing starts.
+
+Timing was acquired using \texttt{std::chrono::high\_resolution\_clock}, which queries the invariant processor timestamp counter (\texttt{RDTSC}) with sub-nanosecond precision:
+\begin{lstlisting}[style=latte-cpp]
+// Warmup phase
+for (std::size_t i = 0; i < std::min<std::size_t>(iterations, 5); ++i) {
+    auto res = algorithm::recursive_radix2_fft(signal);
+    do_not_optimize(res);
+}
+
+// Measured phase
+const auto start = std::chrono::high_resolution_clock::now();
+for (std::size_t i = 0; i < iterations; ++i) {
+    auto res = algorithm::recursive_radix2_fft(signal);
+    do_not_optimize(res);
+}
+const auto end = std::chrono::high_resolution_clock::now();
+const auto total_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+double mean_us = (static_cast<double>(total_ns) / iterations) / 1000.0;
+\end{lstlisting}
+
+\paragraph{Input Array Distribution \& Fairness in Iterations}~{}\\
+All input arrays were populated with uniformly distributed pseudo-random complex numbers:
+\begin{equation}
+x_k = u_k + i v_k, \quad u_k, v_k \sim \mathcal{U}(-1.0, 1.0)
+\end{equation}
+generated using a 64-bit Mersenne Twister (\texttt{std::mt19937\_64}) seeded with a fixed constant (\texttt{seed = 42}) for deterministic reproducibility. 
+
+Small arrays execute in mere nanoseconds, which can suffer from timer quantisation error. Large arrays take significantly longer. To balance accuracy and total runtime, an adaptive iteration schedule was used. This scaled from $50,000$ iterations for $N \le 16$ down to $5$ iterations for $N \ge 8,192$.
+
+\subsection{Experiment 1: Asymptotic Scaling \& Crossover Point} \label{sec:exp1_design}
+\subsubsection*{The Setup}
+\paragraph{Objective}~{}\\
+This experiment compares the execution runtime of the Naive DFT against the Recursive Radix-2 FFT across input sizes $N \in [2^1, 2^{13}]$ ($2$ to $8,192$). Beyond $N = 8,192$, Naive DFT becomes impractically slow due to its $\mathcal{O}(N^2)$ scaling.
+
+\paragraph{Hypothesis}~{}\\
+\begin{enumerate}
+    \item On a log-log scale ($\log_{10} T$ versus $\log_2 N$), Naive DFT will display a linear slope of $k \approx 2.0$ ($\mathcal{O}(N^2)$). Recursive FFT will display a slope of $k \approx 1.05$ ($\mathcal{O}(N \log_2 N)$).
+    \item For small inputs ($N = 2$ and $N = 4$), Naive DFT will be faster than Recursive FFT. Naive DFT requires zero heap allocations and runs a flat loop. In contrast, Recursive FFT incurs call-stack overhead and dynamic \texttt{std::vector} allocations.
+    \item At $N \ge 8$, the $\mathcal{O}(N \log_2 N)$ asymptotic advantage will permanently surpass the constant-factor overhead, resulting in an exponentially widening performance gap.
+\end{enumerate}
+
+\paragraph{Methodology}~{}\\
+Both algorithms were evaluated on power-of-two sizes $N = 2^1, 2^2, \dots, 2^{13}$. For each $N$, the mean execution time in microseconds ($\mu\text{s}$) was recorded across the adaptive iteration schedule. Linear regression was then performed in the log-log domain to compute empirical scaling slopes.
+
+\subsubsection*{The Results}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\linewidth]{experiment1_loglog.png}
+    \caption{Log-log scaling of execution time versus input size $N$ for Naive DFT and Recursive Radix-2 FFT, showing empirical regression slopes and the low-$N$ crossover point.}
+    \label{fig:exp1}
+\end{figure}
+
+The linear regression on the logarithmic data ($\log_{10} T = k \log_{10} N + b$) confirms the theoretical complexity bounds with remarkable precision:
+\begin{itemize}
+    \item \textbf{Naive DFT:} Empirical slope $k_{\text{DFT}} = \mathbf{1.86} \approx 2.0$, matching the quadratic $\mathcal{O}(N^2)$ nested loop scaling.
+    \item \textbf{Recursive FFT:} Empirical slope $k_{\text{FFT}} = \mathbf{1.07} \approx 1.05$, matching the theoretical $\mathcal{O}(N \log_2 N)$ linearithmic curve.
+\end{itemize}
+
+On another note, at $N = 2$, Naive DFT is slightly faster than Recursive FFT ($124.3\text{ ns}$ versus $125.7\text{ ns}$). For this minimal size, Naive DFT executes 4 complex multiplications in a direct loop with zero stack allocation. Recursive FFT incurs function call overhead and allocates intermediate sub-vectors. 
+
+At $N = 4$, divide-and-conquer overcomes this setup cost. Recursive FFT completes in $199.1\text{ ns}$, compared to $234.3\text{ ns}$ for Naive DFT. From $N \ge 8$, the FFT permanently dominates. At $N = 8,192$, Naive DFT consumes $1.104\text{ seconds}$, while Recursive FFT takes only $1.979\text{ milliseconds}$, which is a speed-up of 558 times! Thus, the hypotheses 1 and 3 were proven true, while hypothesis 2 is partly true.
 
 
-\section{The Empirical Study} 
+\subsection{Experiment 2: Call-Stack Overhead \& In-Place Bit-Reversal} \label{sec:exp2_design}
+\subsubsection*{The Setup}
+\paragraph{Objective}~{}\\
+This experiment isolates the impact of dynamic memory allocation and recursive stack depth by comparing the Recursive Radix-2 FFT against the Iterative Radix-2 FFT across input sizes $N \in [2^1, 2^{18}]$ ($2$ to $262,144$).
 
+
+\paragraph{Hypothesis}~{}\\
+\begin{enumerate}
+    \item Although both implementations possess identical theoretical asymptotic complexity $\mathcal{O}(N \log_2 N)$, the Iterative version will achieve a substantial speedup (4 to 8 times).
+    % \item At each level of the recursive call tree, the algorithm allocates two distinct sub-vectors of size $N/2$. Across the full recursion tree, this produces:
+    % \begin{equation}
+    % \sum_{k=1}^{\log_2 N} 2^k = 2^{\log_2 N + 1} - 2 = 2N - 2
+    % \end{equation}
+    % dynamic heap allocations per transform. These continuous allocations trigger heap memory manager locks, fragment cache lines, and cause cache evictions.
+    % \item In contrast, the Iterative implementation executes an in-place bit-reversal permutation once. All subsequent butterfly operations operate directly within a single contiguous vector buffer, maximising CPU L1/L2 cache line retention.
+    \item For $N = 2$, Recursive FFT will remain competitive because the recursion terminates after a single branch.
+\end{enumerate}
+
+\paragraph{Methodology}~{}\\
+The speedup ratio is formally defined as:
+\begin{equation}
+S_{\text{inplace}}(N) = \frac{T_{\text{recursive}}(N)}{T_{\text{iterative}}(N)}
+\end{equation}
+Execution times were measured for $N = 2^1, 2^2, \dots, 2^{18}$, and $S_{\text{inplace}}(N)$ was plotted against $N$ on a logarithmic base-2 horizontal axis. The higher the ratio, the faster it is for the Iterative version. If the ratio is below 1, then it is faster for the Recursive version.
+
+\subsubsection*{The Results}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\linewidth]{experiment2_speedup.png}
+    \caption{Speedup factor of Iterative Radix-2 FFT over Recursive Radix-2 FFT across $N = 2^1$ to $2^{18}$.}
+    \label{fig:exp2}
+\end{figure}
+
+Throughout the entire graph, the ratio value is always above 1, this means the Iterative version is always faster. Ranging from 2.2 to 5.4 times faster.
+
+At $N = 8$ and $N=2^{18}$, the Iterative version demonstrates a decisive speedup between at 4.87 times and 5.43 times.
+
+The explanation for this can be: 
+\begin{enumerate}
+    \item Each Recursive FFT call allocation invokes the runtime heap allocator (\texttt{malloc}/\texttt{free}), adding bookkeeping overhead and memory synchronisation locks.
+    \item In Recursive FFT, sub-vector allocations reside at scattered heap addresses. This disrupts CPU hardware pre-fetchers and causes Translation Lookaside Buffer (TLB) misses. Conversely, the Iterative algorithm allocates memory once. It executes all butterfly updates in place within contiguous 64-byte cache lines.
+\end{enumerate}
+Thus, hypothesise 1 is partly true due to the over-confident speedup and hypothesis 4 is wrong.
+
+\subsection{Experiment 3: On-the-fly Math vs. Precomputed Twiddles} \label{sec:exp3_design}
+\subsubsection*{The Setup}
+\paragraph{Objective}~{}\\
+This experiment investigates the computational trade-off between evaluating trigonometric twiddle factors on the fly versus reading them from a pre-calculated lookup table. This will be done between the Iterative Radix-2 FFT against the Precomputed Twiddles Radix-2 FFT across $N \in [2^1, 2^{20}]$ ($2$ to $1,048,576$).
+
+\paragraph{Hypothesis}~{}\\
+\begin{enumerate}
+    \item For small inputs ($N \le 4$), precomputing the twiddles will provide a notable speedup by eliminating transcendental initialisation calls (\texttt{std::polar}, \texttt{std::sin}, \texttt{std::cos}).
+    % \item For larger $N$, the iterative algorithm computes twiddles via the recurrence relation:
+    % \begin{equation}
+    % W \gets W \cdot W_m
+    % \end{equation}
+    % This operation executes entirely within CPU vector registers in $3$--$4$ clock cycles without touching memory.
+    % \item In contrast, the precomputed implementation performs an array read \texttt{W[j * step]} on every butterfly. Because of the outer block loop, these reads access memory across non-unit strides ($step = N / m$).
+    \item As $N$ expands to $2^{20}$, the precomputed twiddle table requires $524,288 \times 16\text{ bytes} \approx 8.39\text{ MiB}$. This completely exceeds the L1 and L2 caches, causing capacity-induced cache misses that degrade lookup throughput.
+\end{enumerate}
+
+\paragraph{Methodology}~{}\\
+Execution times for both algorithms were benchmarked for all powers of two from $N = 2^1$ to $2^{20}$. To isolate transform latency, table allocation and precomputation time was excluded from the per-transform timing loop. This represents the standard production scenario where a precomputed plan is reused across thousands of successive FFT frames.
+\subsubsection*{The Results}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\linewidth]{experiment3_precomputed.png}
+    \caption{Execution time and speedup factor of Precomputed Twiddles versus Iterative Radix-2 FFT across $N = 2^1$ to $2^{20}$.}
+    \label{fig:exp3}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\small
+\caption{Experiment 3: Execution times and speedup factors for Iterative versus Precomputed Twiddles FFT.}
+\label{tab:exp3}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{@{}rccccc@{}}
+\toprule
+\textbf{Input Size $N$} & \textbf{Iterations} & \textbf{Iterative ($\mu\text{s}$)} & \textbf{Precomputed ($\mu\text{s}$)} & \textbf{Speedup ($T_{\text{iter}} / T_{\text{pre}}$)} & \textbf{Faster Variant} \\
+\midrule
+$2$          & $50,000$ & $0.146$   & $0.063$   & $\mathbf{2.33\times}$ & \textbf{Precomputed} \\
+$4$          & $50,000$ & $0.221$   & $0.166$   & $\mathbf{1.33\times}$ & \textbf{Precomputed} \\
+$8$          & $50,000$ & $0.444$   & $0.509$   & $0.87\times$          & Iterative \\
+$64$         & $10,000$ & $1.354$   & $2.385$   & $0.57\times$          & Iterative \\
+$1,024$      & $500$    & $32.01$   & $76.65$   & $0.42\times$          & Iterative \\
+$8,192$      & $40$     & $320.98$  & $633.08$  & $0.51\times$          & Iterative \\
+$65,536$     & $15$     & $3,102.95$& $6,230.45$& $0.50\times$          & Iterative \\
+$262,144$    & $8$      & $15,397.06$& $29,773.52$& $0.52\times$         & Iterative \\
+$1,048,576$  & $4$      & $93,970.10$& $163,708.72$& $0.57\times$        & Iterative \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+The results reveal:
+\begin{enumerate}
+    \item Precomputing twiddles provides an initial 2.33 times speedup at $N = 2$ and 1.33 times at $N = 4$ by eliminating expensive trigonometric initialisation calls (\texttt{std::polar}).
+    \item Counter-intuitively, for $N \ge 8$, the Iterative implementation is approximately 2 times faster than the Precomputed version ($S \approx 0.50\times$). 
+    
+    The reason lies in the compiler's vectorisation pipeline. In the Iterative implementation, the twiddle factor for each butterfly stage is updated via complex multiplication:
+    \begin{equation}
+    W \gets W \cdot W_m
+    \end{equation}
+    Under \texttt{-O3}, GCC maps $W$ and $W_m$ directly into hardware SIMD registers (AVX/SSE). Each butterfly multiplication is computed in $3$--$4$ CPU clock cycles purely inside the ALU, requiring \textit{zero memory traffic}.
+    
+    In contrast, the Precomputed implementation must load \texttt{W[j * step]} from memory on every butterfly. Because of the outer block structure, these reads traverse memory with a stride of $step = N / m$. This strided access defeats sequential cache line prefetching and adds memory load latency to the critical path.
+    \item At $N = 2^{20}$, the precomputed twiddle table requires $524,288 \times 16\text{ bytes} \approx 8.39\text{ MiB}$. This footprint exceeds the L2 cache and occupies nearly $70\%$ of the shared L3 cache, causing cache capacity misses that slow down lookups.
+\end{enumerate}
+Given the minor increase in execution time, the precomputed twiddles methods show more cons than pros. Thus, both hypothesis are correct.
+
+\subsection{Experiment 4: The Hardware \emph{Cache Cliff} Effect} \label{sec:exp4_design}
+\subsubsection*{The Setup}
+\paragraph{Objective}~{}\\
+Standard asymptotic algorithm analysis assumes the Uniform Cost Random Access Machine (RAM) model, where every memory read and write takes $\mathcal{O}(1)$ time regardless of array size. Real computer architectures rely on a hierarchical memory structure (L1d, L2, L3, and DRAM) where memory access latencies vary by two orders of magnitude ($\approx 1\text{ ns}$ for L1d versus $\approx 70\text{ ns}$ for main memory) \cite{aggarwal1988}.
+
+To expose this phenomenon, we can measure the normalised time per element:
+\begin{equation} \label{eq:tau}
+\tau(N) = \frac{T(N)}{N \log_2 N} \quad (\text{nanoseconds per butterfly element})
+\end{equation}
+
+\paragraph{Hypothesis}~{}\\
+\begin{enumerate}
+    \item Under the ideal theoretical RAM model, $\tau(N)$ should be a flat horizontal line:
+    \begin{equation}
+    T(N) = c \cdot N \log_2 N \implies \tau(N) = c = \text{constant}
+    \end{equation}
+    \item On physical hardware, $\tau(N)$ will exhibit sharp step jumps (``cache cliffs'') at the exact working set thresholds where active memory footprint $W(N) = N \times 16\text{ bytes}$ overflows each cache tier:
+    \begin{itemize}
+        \item \textbf{L1d Overflow ($N > 2^{11} = 2,048$, $32\text{ KiB}$):} Initial slight latency elevation.
+        \item \textbf{L2 Overflow ($N > 2^{16} = 65,536$, $1.0\text{ MiB}$):} Latency penalty as accesses spill into shared L3.
+        \item \textbf{L3 DRAM Spillover ($N > 2^{19} = 524,288$, $8.0\text{ MiB}$):} Severe latency cliff as working set size approaches and surpasses the $12\text{ MiB}$ shared L3 cache limit, forcing frequent DRAM line fetches across the memory bus.
+    \end{itemize}
+\end{enumerate}
+
+\paragraph{Methodology}~{}\\
+Normalised execution time $\tau(N)$ was calculated across $N = 2^5$ to $2^{20}$ for both Iterative and Precomputed implementations. The working-set footprint was calculated as $N \times 16\text{ bytes}$ for Iterative FFT and $(N + N/2) \times 16\text{ bytes}$ for Precomputed FFT (signal plus twiddle table).
+
+\subsubsection*{The Results}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\linewidth]{experiment4_cache_cliff.png}
+    \caption{Normalised execution time per element $\tau(N) = \frac{T(N)}{N \log_2 N}$ across the CPU cache hierarchy, highlighting the L2 transition and the L3 DRAM spillover cliff.}
+    \label{fig:exp4}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\small
+\caption{Experiment 4: Measured normalised time per element $\tau(N)$ versus CPU memory hierarchy.}
+\label{tab:exp4}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{@{}rccccl@{}}
+\toprule
+\textbf{Input Size $N$} & \textbf{Working Set (16B)} & \textbf{Iterative $\tau(N)$ (ns)} & \textbf{Precomputed $\tau(N)$ (ns)} & \textbf{Cache Tier} & \textbf{Observed Architectural Behaviour} \\
+\midrule
+$2^5$ ($32$)     & $0.5\text{ KiB}$  & $3.56$ & $6.06$ & L1d Cache & Loop startup and instruction pipeline warm-up \\
+$2^6$ ($64$)     & $1.0\text{ KiB}$  & $3.17$ & $5.95$ & L1d Cache & L1d steady-state plateau begins \\
+$2^8$ ($256$)    & $4.0\text{ KiB}$  & $3.03$ & $5.94$ & L1d Cache & Invariant plateau \\
+$2^{10}$ ($1,024$) & $16.0\text{ KiB}$ & $3.01$ & $5.95$ & L1d Cache & Invariant plateau \\
+$2^{12}$ ($4,096$) & $64.0\text{ KiB}$ & $3.03$ & $5.98$ & L1d / L2  & Smooth L1d-to-L2 transition \\
+$2^{14}$ ($16,384$)& $256.0\text{ KiB}$& $2.98$ & $5.95$ & L2 Cache  & Invariant plateau \\
+$2^{16}$ ($65,536$)& $1.0\text{ MiB}$  & $2.98$ & $5.94$ & L2 Cache  & Upper bound of single-core L2 capacity \\
+$2^{17}$ ($131,072$)& $2.0\text{ MiB}$ & $3.04$ & $6.10$ & L2 $\to$ L3 & Initial L2 cache boundary spillover (+2\%) \\
+$2^{18}$ ($262,144$)& $4.0\text{ MiB}$ & $3.18$ & $6.26$ & L3 Cache  & L2 Cache Cliff: Ring-bus transit (+6\%) \\
+$2^{19}$ ($524,288$)& $8.0\text{ MiB}$ & $3.70$ & $6.70$ & L3 Cache  & L3 capacity saturation (+24\%) \\
+$2^{20}$ ($1,048,576$)& $16.0\text{ MiB}$& $\mathbf{4.46}$ & $\mathbf{7.56}$ & \textbf{DRAM} & \textbf{L3 Cache Cliff: DRAM spillover (+47.4\%!)} \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+We can see that:
+\begin{enumerate}
+    \item For array sizes fitting within the 2 MiB per-core L2 cache ($1\text{ KiB}$ to $1\text{ MiB}$), $\tau(N)$ remains completely flat at $\tau_{\text{iter}} \approx 3.00\text{ ns}$ and $\tau_{\text{pre}} \approx 5.95\text{ ns}$. In this range, the theoretical RAM model holds true. Thus, proving hypothesis 1. 
+    \item When the working set reaches $4\text{ MiB}$, it exceeds the $2\text{ MiB}$ private L2 cache. Cache lines must travel across the on-die ring bus from shared L3, raising $\tau_{\text{iter}}$ from $2.98\text{ ns}$ to $3.18\text{ ns}$ (+6.7\%).
+    \item At $N = 2^{20}$, the working set reaches $16\text{ MiB}$ for Iterative FFT and $24\text{ MiB}$ for Precomputed FFT. This strictly exceeds the processor's $12\text{ MiB}$ shared L3 cache. Cache capacity misses force continuous accesses across the memory controller to off-chip DRAM. 
+    
+    Since DRAM latency ($\approx 70\text{ ns}$) is much slower than L2 cache ($\approx 3\text{ ns}$), $\tau(N)$ (from 2MiB to 16MiB) exhibits a \textbf{+46.7\% spike} for Iterative FFT ($3.15\text{ ns} \to 4.62\text{ ns}$) and a \textbf{+29.1\% spike} for Precomputed Twiddles ($6.33\text{ ns} \to 8.16\text{ ns}$). This jump proves that real-world FFT throughput at large scale is memory-bandwidth bound rather than arithmetic-bound. Thus, proving hypothesis 2.
+\end{enumerate}
+
+
+\subsection{Experiment 5: Numerical Precision Drift} \label{sec:exp5_design}
+\subsubsection*{The Setup}
+\paragraph{Objective}~{}\\
+High performance is meaningless if numerical stability is compromised. This experiment evaluates round-trip reconstruction fidelity across all four implementations:
+\begin{equation}
+\hat{x} = \text{IFFT}\big(\text{FFT}(x)\big)
+\end{equation}
+Reconstruction error was quantified using the Chebyshev ($L_\infty$) norm (maximum absolute deviation across all complex components):
+\begin{equation} \label{eq:chebyshev}
+\|e\|_\infty = \max_{0 \le k < N} \big| x[k] - \hat{x}[k] \big|
+\end{equation}
+and the Root-Mean-Square Error (RMSE):
+\begin{equation}
+\text{RMSE} = \sqrt{\frac{1}{N} \sum_{k=0}^{N-1} \big| x[k] - \hat{x}[k] \big|^2}
+\end{equation}
+
+\paragraph{Hypothesis}~{}\\ 
+\begin{enumerate}
+    \item All FFT algorithms will maintain reconstruction error well within standard IEEE 754 double-precision floating-point tolerances ($10^{-16}$ to $10^{-11}$).
+    % \item According to Wilkinson's backward error analysis for FFTs, the error bound grows logarithmically with transform size:
+    % \begin{equation}
+    % \|e\|_\infty \le C \cdot \varepsilon_{\text{mach}} \sqrt{\log_2 N}
+    % \end{equation}
+    % where $\varepsilon_{\text{mach}} \approx 2.22 \times 10^{-16}$.
+    \item Recursive FFT and Precomputed Twiddles FFT will exhibit the lowest error growth. Their trigonometric twiddle factors are evaluated independently via \texttt{std::polar}, preventing cumulative multiplication errors.
+    \item In contrast, Iterative Radix-2 FFT updates twiddles sequentially in the butterfly loop via recurrence ($W \gets W \cdot W_m$). Due to finite precision rounding, repeated complex multiplications cause $|W|$ to drift away from unity ($|W| \neq 1$) and accumulate phase drift. This leads to higher numerical drift at large $N$ ($N \ge 2^{16}$).
+    \item Naive DFT will accumulate roundoff errors proportional to $\mathcal{O}(\varepsilon_{\text{mach}} \sqrt{N})$ due to performing $N$ discrete additions per frequency bin.
+\end{enumerate}
+
+\paragraph{Methodology}~{}\\
+A deterministic random signal was transformed by FFT and reconstructed by IFFT for sizes $N = 2^1$ to $2^{20}$ (with Naive DFT evaluated up to $N = 2^{13}$). $\|e\|_\infty$ and RMSE were recorded and plotted on a semi-logarithmic scale.
+
+\subsubsection*{The Results}
+\begin{figure}[H]
+\centering
+    \includegraphics[width=0.92\linewidth]{experiment5_precision.png}
+    \caption{Maximum absolute reconstruction error $\|e\|_\infty$ versus input size $N$ on a semi-logarithmic scale across all four FFT/DFT implementations.}
+    \label{fig:exp5}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\small
+\caption{Experiment 5: Measured Chebyshev reconstruction error $\|e\|_\infty$ across input sizes.}
+\label{tab:exp5}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{@{}rccccc@{}}
+\toprule
+\textbf{Input Size $N$} & \textbf{Naive DFT} & \textbf{Recursive FFT} & \textbf{Iterative FFT} & \textbf{Precomputed FFT} & \textbf{Relative Stability} \\
+\midrule
+$2^1$ ($2$)      & $5.55 \times 10^{-17}$ & $5.55 \times 10^{-17}$ & $5.55 \times 10^{-17}$ & $5.55 \times 10^{-17}$ & Identical ($0.25 \varepsilon_{\text{mach}}$) \\
+$2^4$ ($16$)     & $5.12 \times 10^{-15}$ & $3.51 \times 10^{-16}$ & $4.00 \times 10^{-16}$ & $3.51 \times 10^{-16}$ & DFT accumulates roundoff \\
+$2^6$ ($64$)     & $2.90 \times 10^{-14}$ & $5.66 \times 10^{-16}$ & $2.09 \times 10^{-15}$ & $5.66 \times 10^{-16}$ & Iterative recurrence begins drift \\
+$2^{10}$ ($1,024$)& $4.35 \times 10^{-13}$& $1.02 \times 10^{-15}$ & $4.27 \times 10^{-14}$ & $1.02 \times 10^{-15}$ & Precomputed $42\times$ more accurate \\
+$2^{13}$ ($8,192$)& $\mathbf{4.85 \times 10^{-12}}$& $1.24 \times 10^{-15}$ & $1.32 \times 10^{-13}$ & $\mathbf{1.24 \times 10^{-15}}$& \textbf{Naive DFT error is $3906\times$ higher!} \\
+$2^{16}$ ($65,536$)& \textit{Omitted}      & $1.47 \times 10^{-15}$ & $3.67 \times 10^{-12}$ & $1.47 \times 10^{-15}$ & Precomputed pinned near $10^{-15}$ \\
+$2^{20}$ ($1,048,576$)& \textit{Omitted}   & $\mathbf{2.05 \times 10^{-15}}$ & $\mathbf{5.76 \times 10^{-11}}$ & $\mathbf{2.05 \times 10^{-15}}$ & \textbf{Precomputed is $28,129\times$ more stable!} \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+Right away, we can see that the hypothesis 1 is only true with $N<2^{17}$. After that, the Iterative FFT takes off. There are three more noticeable things here:
+\begin{enumerate}
+    \item Both Recursive FFT and Precomputed Twiddles FFT exhibit near-ideal numerical stability, scaling as $\mathcal{O}(\varepsilon_{\text{mach}} \sqrt{\log_2 N})$. Between $N = 2$ and $N = 1,048,576$, the error increases by only a factor of $37\times$ (from $5.55 \times 10^{-17}$ to $2.05 \times 10^{-15}$). It remains within five multiples of machine epsilon. Thus, proving hypothesis 2.
+    \item In Iterative FFT, twiddle factors are updated via successive multiplications $W \gets W \cdot W_m$ without normalisation. Truncation errors cause the magnitude $|W|$ to deviate slightly from $1.0$. Phase angles also drift monotonically over thousands of iterations. At $N = 2^{20}$, the error reaches $5.76 \times 10^{-11}$. 
+    
+    By looking up independently evaluated twiddles from a table, Precomputed Twiddles FFT eliminates this drift entirely, demonstrating $\mathbf{28,129\times}$ superior numerical precision over the Iterative FFT at $N = 1,048,576$. Thus, proving hypothesis 3.
+    \item Since Naive DFT accumulates $N$ terms directly in each summation, roundoff errors accumulate proportionally to $\mathcal{O}(\varepsilon_{\text{mach}} \sqrt{N})$ or $\mathcal{O}(\varepsilon_{\text{mach}} N)$. At $N = 8,192$, Naive DFT error degrades to $4.85 \times 10^{-12}$, which is \textbf{$3906\times$ worse} than Cooley--Tukey FFT. This demonstrates that the Cooley--Tukey algorithm is not only faster, but fundamentally more numerically well-conditioned than direct summation. Thus, proving hypothesis 4.
+\end{enumerate}
+
+\subsection{Experiment 6: Mixed-Radix Factorisation \& Prime Degradation} \label{sec:exp6_design}
+\subsubsection*{The Setup}
+\paragraph{Objective}~{}\\
+The Cooley--Tukey algorithm decomposes an input sequence of length $N$ into non-trivial sub-factors $N = N_1 \times N_2$. When $N$ is composite, the transform is broken into $N_2$ transforms of length $N_1$ followed by $N_1$ transforms of length $N_2$. If $N$ has small prime factors ($2, 3, 5$), this divide-and-conquer strategy achieves $\mathcal{O}(N \sum p_i) \to \mathcal{O}(N \log N)$ execution.
+
+However, if $N$ is a prime number ($N \in \mathbb{P}$):
+\begin{equation}
+\not\exists N_1, N_2 \in \mathbb{Z}^+ \setminus \{1\} \quad \text{s.t.} \quad N = N_1 \times N_2
+\end{equation}
+For prime $N$, matrix reshaping is impossible. The Mixed-Radix algorithm must terminate at the base case and execute a direct $\mathcal{O}(N^2)$ discrete Fourier transform.
+
+
+\paragraph{Hypothesis}~{}\\
+\begin{enumerate}
+    \item For prime lengths $N$, Mixed-Radix FFT will exhibit runtimes that are virtually identical to Naive DFT ($T_{\text{mixed}} \approx T_{\text{naive}}$, speedup ratio $\approx 1.0\times$), scaling along an $\mathcal{O}(N^2)$ slope.
+    \item For composite lengths of comparable magnitude, recursive factorisation will accelerate computation, yielding speedups exceeding $100\times$ to $200\times$ at $N \approx 8,192$.
+    \item On a log-log execution plot, prime sizes will track the upper $\mathcal{O}(N^2)$ bound, while composite sizes will evolve downward into the $\mathcal{O}(N \log N)$ bound.
+\end{enumerate}
+
+\paragraph{Methodology}~{}\\
+We evaluated 32 distinct input sizes spanning three structural categories up to $N = 8,192$:
+\begin{itemize}
+    \item \textbf{Primes:} $N \in \{7, 13, 31, 61, 127, 251, 509, 1021, 2039, 4093, 8191\}$ (including Mersenne primes $2^7-1 = 127$ and $2^{13}-1 = 8191$).
+    \item \textbf{Powers of Two ($2^k$):} $N \in \{8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192\}$.
+    \item \textbf{Smooth Composites ($2^a 3^b 5^c$):} Non-power-of-two composite lengths:
+    \begin{center}
+    $N \in \{12, 24, 60, 120, 240, 480, 960, 1920, 3840, 7680\}$.
+    \end{center}
+\end{itemize}
+Both Naive DFT and Mixed-Radix FFT were executed on all 32 inputs under identical benchmark controls, recording execution times and speedup ratio $S_{\text{mixed}}(N) = T_{\text{naive}}(N) / T_{\text{mixed}}(N)$.
+
+\subsubsection*{The Results}
+There are two figures:
+\begin{itemize}
+    \item \textbf{Panel 1 (Left):} Execution Time vs. $N$ on a log-log scale, contrasting Primes, Powers-of-2, and Smooth Composites against theoretical $\mathcal{O}(N^2)$ and $\mathcal{O}(N \log N)$ bounds.
+    \item \textbf{Panel 2 (Right):} Speedup Ratio $S_{\text{mixed}}(N) = T_{\text{naive}} / T_{\text{mixed}}$ vs. $N$.
+\end{itemize}
+Table~\ref{tab:exp6} presents representative numerical measurements across the tested input categories.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{experiment6_mixed_radix.png}
+    \caption{Experiment 6: Mixed-Radix FFT versus Naive DFT across Prime and Composite inputs. Left: Log-log runtime demonstrating identical $\mathcal{O}(N^2)$ scaling on primes and $\mathcal{O}(N \log N)$ bifurcation on composites. Right: Flat $1.0\times$ speedup on primes versus $>200\times$ speedup on composites.}
+    \label{fig:exp6}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\small
+\caption{Experiment 6: Measured runtimes and speedup ratios for Mixed-Radix FFT vs. Naive DFT across Prime and Composite sizes.}
+\label{tab:exp6}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{@{}rcccccc@{}}
+\toprule
+\textbf{Input Size $N$} & \textbf{Category} & \textbf{Factorisation} & \textbf{Naive ($\mu\text{s}$)} & \textbf{Mixed-Radix ($\mu\text{s}$)} & \textbf{Speedup ($T_{\text{naive}} / T_{\text{mixed}}$)} & \textbf{Empirical Regime} \\
+\midrule
+$7$      & Prime     & Prime                   & $0.70$        & $0.42$        & $1.68\times$          & Base case call \\
+$8$      & PowerOf2  & $2^3$                   & $0.54$        & $0.76$        & $0.71\times$          & Recursive setup overhead \\
+$31$     & Prime     & Prime                   & $9.66$        & $9.57$        & $\mathbf{1.01\times}$ & \textbf{Identical Runtime} \\
+$32$     & PowerOf2  & $2^5$                   & $10.00$       & $5.22$        & $1.92\times$          & Divide-and-conquer gain \\
+$61$     & Prime     & Prime                   & $38.68$       & $38.16$       & $\mathbf{1.01\times}$ & \textbf{Identical Runtime} \\
+$64$     & PowerOf2  & $2^6$                   & $43.43$       & $12.39$       & $3.51\times$          & Divide-and-conquer gain \\
+$127$    & Prime     & Mersenne ($2^7-1$)      & $200.25$      & $199.31$      & $\mathbf{1.01\times}$ & \textbf{Identical Runtime} \\
+$128$    & PowerOf2  & $2^7$                   & $203.18$      & $28.27$       & $7.19\times$          & Divide-and-conquer gain \\
+$480$    & Composite & $2^5 \cdot 3 \cdot 5$   & $6,681.57$    & $109.03$      & $\mathbf{61.28\times}$& Multi-radix factorised gain \\
+$1,024$  & PowerOf2  & $2^{10}$                & $27,120.50$   & $314.82$      & $\mathbf{86.15\times}$& Divide-and-conquer gain \\
+$2,039$  & Prime     & Prime                   & $48,892.31$   & $47,818.12$   & $\mathbf{1.02\times}$ & \textbf{Identical Runtime} \\
+$3,840$  & Composite & $2^8 \cdot 3 \cdot 5$   & $290,730.12$  & $1,262.78$    & $\mathbf{230.23\times}$&\textbf{Peak Composite Speedup} \\
+$4,096$  & PowerOf2  & $2^{12}$                & $258,537.35$  & $1,585.97$    & $163.02\times$        & Divide-and-conquer gain \\
+$7,680$  & Composite & $2^9 \cdot 3 \cdot 5$   & $1,331,707.17$& $8,028.23$    & $165.88\times$        & Multi-radix factorised gain \\
+$8,191$  & Prime     & Mersenne ($2^{13}-1$)   & $\mathbf{2,020,043.84}$ & $\mathbf{2,015,601.04}$ & $\mathbf{1.002\times}$ & \textbf{Exact $\mathcal{O}(N^2)$ Fallback} \\
+$8,192$  & PowerOf2  & $2^{13}$                & $\mathbf{2,012,743.78}$ & $\mathbf{9,574.10}$     & $\mathbf{210.23\times}$ & \textbf{Full $\mathcal{O}(N \log N)$ Gain} \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+There are four observations to be made here:
+\begin{enumerate}
+  \item At $N = 8,191$, Mixed-Radix FFT requires \textbf{$2.0156$ seconds}, while Naive DFT requires \textbf{$2.0200$ seconds}. The execution times are identical within $0.2\%$ margin of error, yielding a speedup of precisely \textbf{$\mathbf{1.002\times}$}. This proves hypothesis 1.
+    
+    Because $8,191$ has no non-trivial factors ($N = 1 \times 8191$), the Mixed-Radix algorithm cannot perform any tensor product decomposition or matrix reshaping. It immediately falls back to the direct DFT kernel, traversing the full quadratic $\mathcal{O}(N^2)$ operation count.
+    \item  Incrementing the array length by just one element completely transforms algorithmic execution. For $N = 8,192 = 2^{13}$, the composite binary factorisation unlocks 13 stages of recursive radix-2 butterflies. Runtime drops from \textbf{$2.01$ seconds to $9.57$ milliseconds}, which is a speedup of \textbf{$\mathbf{210.23\times}$}.
+    \item The Mixed-Radix decomposition handles arbitrary smooth composite numbers with outstanding efficiency. At $N = 3,840$ ($2^8 \cdot 3 \cdot 5$), Mixed-Radix achieves a \textbf{$\mathbf{230.23\times}$ speedup} over Naive DFT ($1.26\text{ ms}$ versus $290.73\text{ ms}$). This demonstrates that as long as an input sequence length is composite with small prime factors, Mixed-Radix FFT attains full Cooley--Tukey efficiency without requiring artificial zero-padding to powers of two. Thus, proving hypothesis 2.
+
+    \item As shown in Figure 6 (Left), on a log-log scale, prime sizes track the upper $\mathcal{O}(N^2)$ bound with concentric markers (purple circle enclosing triangle), while composite sizes sharply bifurcate downward into $\mathcal{O}(N \log N)$ trajectory. Thus, proving hypothesis 3.
+\end{enumerate}
 \section{What I learned}
+On the surface, I find the history of the DFT and FFT to be quite fascinating. I also enjoyed designing and implementing the experiments, even though I might have went overboard. 
+
+On a more technical note, I was quite surprise to see how the hardware can behave so differently than the theory. Coming from a mostly theoretical background, all I cared was how this algorithm works and how can I explain it. I always though our hardware are quite good now, so the results should be deterministic. However, there were so much more going on than just a few line of code. Most notably, the Recursive Radix-2 and Iterative Radix-2 use the exact same principle on paper, they uses divide-and-conquer with a complexity of $\mathcal{O}(N\log_2N$. When running them through a computer, the Iterative version were just faster in general. After a bit of digging, I found out that this is because the CPU spent time allocating and freeing the \texttt{vector} on the heap at every recursion level completely overshadows arithmetic operations. This just goes to show the length of what human has gone though to abstract away the primitive to make a working computer, which is incredible. 
+
+In addition, the \textit{Cache Cliff} experiments also taught me a lot of new things. At first, I just though cache are just temporary files stored on computer and occasionally we should remove it. With this experiments, I learned that there is actually a hierarchical order to how the cache is stored. When we dealing with algorithm on a theoretical model like QRAM or Turing Machine, we can just assumes that the execution time and accessing information time can be affected by a constant. But reality, its more like a pyramid, where the memory is stored on top, and then it overflows to the next tier and it gets slower. So in reality, that's not constant at all. Thus, the input size actually has a impact on how fast the execution time is due to the CPU cache storage layout.
+
+One concept that was quite hard to understand for me was why the BRP was needed for the Iterative FFT. I understand that it flips the bit order of the indices, and reshuffle the array accordingly It was the \emph{why} that took me a long time. At first, I kept arguing with the AI that this is unnecessary and we can just split them by half right down the array. But after digesting the algorithm a bit longer, I finally understood that it was carry out divide-and-conquer, and applying the twiddles from a bottom up manner. An advice I would give to someone when they are learning the Radix-2 FFT for the first time is to learn the Recursive version first, as it is top down divide-and-conquer, which was easier to visualise. 
+
+Another concept that was hard for me to swallow was understanding the equivalence of the divide-and-conquer approach of the Radix-2 FFT to the original DFT. It involved me spending a long time trying to break down the main sum from the DFT into the even and odd halves for the FFT. The original goal for me was to try to abstract away from the math as much as I can, to keep the report concise. But in the end, I realised that was not possible, was the FFT was derived from the exploitation of the sum from DFT.
+
+Speaking of math, at the end, I finally understood the way to check for correctness for DFT and FFT is to use their inverse. I first know that the IDFT and IFFT essentially undo the Fourier effect on the transformed array. But when I was writing the algorithm, I realise that I was just repeating myself a lot. Then it kinda clicks with me that IDFT and IFFT are not a differently methods, it is the same algorithm but you just have to flips the signs and normalise the array at the end, loosely speaking. Then I can just not repeating myself and write shorter code. In theory, this should return the exact original input, so it was used to check the correctness of each algorithm. This bring my attention to the hardware, as computer are know to do weird arithmetic that could mess up the floating point for example. After running the correctness check, I also notice that in 64-bit IEEE 754 floating-point arithmetic, floating-point rounding errors can accumulate more as the input size grow and it scale logarithmically. 
+
+Lastly, when running the Mixed-Radix vs the DFT experiments for the first time, I noticed that graph showing the Mixed-Radix perform better overall. But there dips every now and then, which matched closely with the DFT performance. Then I realise the those are where the input sizes were prime. And a prime input size would result in a matrix of one row, which is essentially an array. This was quite a fun observation. 
 
 \section{AI usage Declaration}
+Gemini 3.8 Flash was used to support the making of this project, with a mixed uses of the web version and Antigravity. 
 
+After reading the instruction, I give the AI in Antigravity the instruction and start planning with it, then I ask it to generate a markdown as a plan. I occasionally change this plan as the project progressed. This chat remain the high level guide to keep me on track and give feedback about my ideas. 
+
+Then, I used the web version to ask about DFT and FFT. I ask it on how to write algorithm as pseudocodes, it provided the pseudocodes. I then polished the pseudocodes into my own choice of word, and I coded the algorithm in \texttt{C++} myself. After coding, I ask another AI in Antigravity to check my code, and provide improvement/fixes where applicable. 
+
+At the same time, I was trying to digest the mathematical equivalence of the Radix-2 FFT and the DFT. So I ask the AI web version to break down the math for me. Here, the AI occasionally overcomplicated things and it took me a long time to work with it. Even when I asked it simplify things, it still cannot do it and instead just include new notation. Eventually, I start a new chat, ask the AI to just provide the original mathematical derivation from DFT to Radix-2 FFT. Then I spend some time myself doing the math the old fashion way. After that, I ask the AI on advice on how to explain this concept without going too deep into the math. Here, it was quite helpful as it advice to me that I can abstract away from the twiddle computation and draw out a visual example of a divided-and-conquered array. But in the end, I still need to work out the math in the report to show the change in operator (from + to $-$) as the FFT progress onto the next element. It took me a long time, but then I finally understood the equivalence of the FFTs. I also ask the AI to judge my complexity breakdown, in which it mostly agree and fixing minor details. Plus, while using \LaTeX{}  to write this report, AI in Antigravity were used to help draw tables and figure.
+
+I then went back to the planning AI to start planning for the experiments. I ask it to write out a plan for another AI in Antigravity to carry out the test case generation, graph drawing in \texttt{Python} and eventually run them. The entire code for the experiments is AI generated, since I don't want to waste time making the graph looks pretty. Here, I just kinda took it on trust. After various iteration of running experiments, I polished the objective and hypothesis, the AI run it again until we can show the observation clearly. Looking back, I could have save time by taking to the AI a bit longer to firmly design a solid experiment from the get go. AI in Antigravity was used heavily to design the hardware aspects of the experiment, which involves checking my computer CPU configuration and Cache layout.
+
+After the experiments are ran, I look at the graphs and analyse them myself. I had a difficult time understand the hardware experiments, so I ask another AI in Antigravity to break down the results and explain the causes. Here, I just took it on trust. However, after looking at its explanation and then cross checking with the graph again, I notice that the AI was not reading the data point correctly and was hallucinate the changes and hence the explanation. To fix this, I ask the AI to specifically look at the CSV and not the graph images, then it perform better. I had to fix the explanation a bit, but with the help from AI as it got things right again.
+
+Finally, after putting everything in the report, I ask the AI to proof reading my report and check the referencing. Finally, I ask the planner AI to go through each section and check them once again. After that, I ask the planner AI to clean the repo a bit and fix the README files.
+\newpage{}
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{ref}
 \end{document}

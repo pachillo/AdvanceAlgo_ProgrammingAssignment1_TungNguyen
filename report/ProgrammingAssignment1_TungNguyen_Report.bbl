@@ -2,7 +2,7 @@
 %%% Do NOT edit. File created by BibTeX with style
 %%% ACM-Reference-Format-Journals [18-Jan-2012].
 
-\begin{thebibliography}{3}
+\begin{thebibliography}{10}
 
 %%% ====================================================================
 %%% NOTE TO THE USER: you can override these defaults by providing
@@ -36,11 +36,25 @@
 \providecommand\natexlab[1]{#1}
 \providecommand\showeprint[2][]{arXiv:#2}
 
+\bibitem[Aggarwal and Vitter(1988)]%
+        {aggarwal1988}
+\bibfield{author}{\bibinfo{person}{Alok Aggarwal} {and}
+  \bibinfo{person}{Jeffrey~S. Vitter}.} \bibinfo{year}{1988}\natexlab{}.
+\newblock \showarticletitle{The Input/Output Complexity of Sorting and Related
+  Problems}.
+\newblock \bibinfo{journal}{\emph{Commun. ACM}} \bibinfo{volume}{31},
+  \bibinfo{number}{9} (\bibinfo{year}{1988}), \bibinfo{pages}{1116--1127}.
+\newblock
+
+
 \bibitem[Cooley and Tukey(1965)]%
         {d3ea2d52-5ab2-3128-8b80-efb85267295d}
-\bibfield{author}{\bibinfo{person}{James~W. Cooley} {and} \bibinfo{person}{John~W. Tukey}.} \bibinfo{year}{1965}\natexlab{}.
-\newblock \showarticletitle{An Algorithm for the Machine Calculation of Complex Fourier Series}.
-\newblock \bibinfo{journal}{\emph{Math. Comp.}} \bibinfo{volume}{19}, \bibinfo{number}{90} (\bibinfo{year}{1965}), \bibinfo{pages}{297--301}.
+\bibfield{author}{\bibinfo{person}{James~W. Cooley} {and}
+  \bibinfo{person}{John~W. Tukey}.} \bibinfo{year}{1965}\natexlab{}.
+\newblock \showarticletitle{An Algorithm for the Machine Calculation of Complex
+  Fourier Series}.
+\newblock \bibinfo{journal}{\emph{Math. Comp.}} \bibinfo{volume}{19},
+  \bibinfo{number}{90} (\bibinfo{year}{1965}), \bibinfo{pages}{297--301}.
 \newblock
 \showISSN{00255718, 10886842}
 \urldef\tempurl%
@@ -49,11 +63,51 @@
 \tempurl}
 
 
+\bibitem[Crandall and Pomerance(2005)]%
+        {crandall2005}
+\bibfield{author}{\bibinfo{person}{Richard Crandall} {and}
+  \bibinfo{person}{Carl Pomerance}.} \bibinfo{year}{2005}\natexlab{}.
+\newblock \bibinfo{booktitle}{\emph{Prime Numbers: A Computational Perspective}
+  (\bibinfo{edition}{2nd} ed.)}.
+\newblock \bibinfo{publisher}{Springer}.
+\newblock
+
+
+\bibitem[Drepper(2007)]%
+        {drepper2007}
+\bibfield{author}{\bibinfo{person}{Ulrich Drepper}.}
+  \bibinfo{year}{2007}\natexlab{}.
+\newblock \bibinfo{booktitle}{\emph{What Every Programmer Should Know About
+  Memory}}.
+\newblock \bibinfo{type}{{T}echnical {R}eport}. \bibinfo{institution}{Red Hat,
+  Inc.}
+\newblock
+\urldef\tempurl%
+\url{https://people.freebsd.org/~lstewart/articles/cpumemory.pdf}
+\showURL{%
+\tempurl}
+
+
+\bibitem[Frigo and Johnson(2005)]%
+        {frigo2005design}
+\bibfield{author}{\bibinfo{person}{Matteo Frigo} {and}
+  \bibinfo{person}{Steven~G Johnson}.} \bibinfo{year}{2005}\natexlab{}.
+\newblock \showarticletitle{The design and implementation of FFTW3}.
+\newblock \bibinfo{journal}{\emph{Proc. IEEE}} \bibinfo{volume}{93},
+  \bibinfo{number}{2} (\bibinfo{year}{2005}), \bibinfo{pages}{216--231}.
+\newblock
+
+
 \bibitem[Heideman et~al\mbox{.}(1985)]%
         {fbf62979-8f62-38b9-8163-f7084de8b15a}
-\bibfield{author}{\bibinfo{person}{Michael~T. Heideman}, \bibinfo{person}{Don~H. Johnson}, {and} \bibinfo{person}{C.~Sidney Burrus}.} \bibinfo{year}{1985}\natexlab{}.
-\newblock \showarticletitle{Gauss and the History of the Fast Fourier Transform}.
-\newblock \bibinfo{journal}{\emph{Archive for History of Exact Sciences}} \bibinfo{volume}{34}, \bibinfo{number}{3} (\bibinfo{year}{1985}), \bibinfo{pages}{265--277}.
+\bibfield{author}{\bibinfo{person}{Michael~T. Heideman},
+  \bibinfo{person}{Don~H. Johnson}, {and} \bibinfo{person}{C.~Sidney Burrus}.}
+  \bibinfo{year}{1985}\natexlab{}.
+\newblock \showarticletitle{Gauss and the History of the Fast Fourier
+  Transform}.
+\newblock \bibinfo{journal}{\emph{Archive for History of Exact Sciences}}
+  \bibinfo{volume}{34}, \bibinfo{number}{3} (\bibinfo{year}{1985}),
+  \bibinfo{pages}{265--277}.
 \newblock
 \showISSN{00039519, 14320657}
 \urldef\tempurl%
@@ -62,11 +116,40 @@
 \tempurl}
 
 
+\bibitem[{ISO/IEC JTC 1/SC 22/WG 21}(2020)]%
+        {isocpp20}
+\bibfield{author}{\bibinfo{person}{{ISO/IEC JTC 1/SC 22/WG 21}}.}
+  \bibinfo{year}{2020}\natexlab{}.
+\newblock \bibinfo{title}{{ISO/IEC 14882:2020} Programming Languages ---
+  {C++}}.
+\newblock
+
+
+\bibitem[Oppenheim et~al\mbox{.}(1989)]%
+        {oppenheim1989discrete}
+\bibfield{author}{\bibinfo{person}{Alan~V Oppenheim}, \bibinfo{person}{Ronald~W
+  Schafer}, \bibinfo{person}{John~R Buck}, {et~al\mbox{.}}}
+  \bibinfo{year}{1989}\natexlab{}.
+\newblock \bibinfo{title}{Discrete-time signal processing}.
+\newblock
+
+
 \bibitem[Terras(1999)]%
         {Terras_1999}
-\bibfield{author}{\bibinfo{person}{Audrey Terras}.} \bibinfo{year}{1999}\natexlab{}.
-\newblock \bibinfo{booktitle}{\emph{Fourier Analysis on Finite Groups and Applications}}.
+\bibfield{author}{\bibinfo{person}{Audrey Terras}.}
+  \bibinfo{year}{1999}\natexlab{}.
+\newblock \bibinfo{booktitle}{\emph{Fourier Analysis on Finite Groups and
+  Applications}}.
 \newblock \bibinfo{publisher}{Cambridge University Press}.
+\newblock
+
+
+\bibitem[Thomas~H et~al\mbox{.}(2009)]%
+        {thomas2009introduction}
+\bibfield{author}{\bibinfo{person}{Cormen Thomas~H}, \bibinfo{person}{E
+  Charles}, \bibinfo{person}{Rivest Ronald~L}, \bibinfo{person}{Stein
+  Clifford}, {et~al\mbox{.}}} \bibinfo{year}{2009}\natexlab{}.
+\newblock \bibinfo{title}{Introduction to algorithms third edition}.
 \newblock
 
 
